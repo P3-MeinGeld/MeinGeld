@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121417">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mein Geld">
+<title>Mein Geld</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121417; --card:#1c1f25; --card2:#262a32; --line:#363b46;
+  --text:#f1f2f4; --muted:#a8aebb;
+  --green:#8fe39b; --green2:#2f9e5b;
+  --orange:#ffc48a; --orange2:#e07a1f;
+  --grey:#6b7280; --food:#e3c04d; --red:#ff5c5c; --redbg:#3a1416; --orangebg:#3a2612;
+  --fs:19px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:var(--fs);line-height:1.35}
+#app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;position:relative}
+.screen{padding:calc(16px + env(safe-area-inset-top)) 18px 24px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;gap:16px}
+.screen.withbar{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+h1{font-size:1.6em;margin:4px 0 0;line-height:1.2}
+h2{font-size:1.15em;margin:0 0 10px}
+p{margin:0}
+.muted{color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;padding:12px 16px;border-radius:16px;
+  background:var(--card2);color:var(--text);border:2px solid var(--line);font:inherit;font-weight:700;font-size:1.05em;cursor:pointer;text-align:center}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--green2);border-color:#3fbf72;color:#fff}
+.btn.big{min-height:72px;font-size:1.2em}
+.btn.danger{background:#5a1a1d;border-color:var(--red)}
+.btn.small{min-height:48px;width:auto;padding:8px 14px;font-size:.95em}
+.btn.sel{border-color:var(--green);background:#203a2a}
+.btn .sub{display:block;font-weight:400;font-size:.8em;color:var(--muted)}
+.btn.choice{flex-direction:column;gap:2px;min-height:80px}
+.row{display:flex;gap:12px}
+.row>.btn{flex:1}
+.footer{margin-top:auto;display:flex;gap:12px;padding-top:8px}
+.footer .btn{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+input[type=text],input[type=date]{width:100%;min-height:62px;font:inherit;font-size:1.2em;padding:10px 16px;border-radius:14px;border:2px solid var(--line);background:#0d0f12;color:var(--text)}
+input:focus{outline:3px solid var(--green2);outline-offset:1px}
+.err{color:var(--red);font-weight:700}
+.dots{display:flex;gap:7px;justify-content:center;padding:6px 0;flex-wrap:wrap}
+.dots i{width:11px;height:11px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--green)}
+.qhead{display:flex;align-items:flex-start;gap:12px}
+.qhead h1{flex:1}
+.speak{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--card2);font-size:1.4em;cursor:pointer;color:var(--text)}
+.speakov{position:fixed;inset:0;z-index:50;background:rgba(10,12,15,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px;font-size:1.3em;font-weight:700;cursor:pointer}
+.speakov .big{font-size:3em}
+.amount{font-size:2.6em;font-weight:700;text-align:center;padding:8px;border-radius:16px;background:#0d0f12;border:2px solid var(--line);font-variant-numeric:tabular-nums}
+.amount.neg{color:var(--red)}
+.amount span{color:var(--muted);font-size:.7em}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{min-height:62px;border-radius:14px;border:2px solid var(--line);background:var(--card2);color:var(--text);font:inherit;font-size:1.6em;font-weight:700;cursor:pointer}
+.key:active{background:var(--line)}
+.item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--card2);border-left:8px solid var(--grey)}
+.item .t{flex:1}
+.item .t b{display:block}
+.item.in-rec{border-left-color:var(--green2)} .item.in-once{border-left-color:var(--green)}
+.item.out-rec{border-left-color:var(--orange2)} .item.out-once{border-left-color:var(--orange)}
+.item.pot{border-left-color:#7c8cff}
+.x{width:48px;height:48px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--text);font-size:1.2em;cursor:pointer}
+.list{display:flex;flex-direction:column;gap:10px}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid7 .btn,.grid4 .btn,.grid3 .btn{min-height:50px;padding:6px 2px;font-size:1em;border-radius:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:48px;padding:8px 14px;border-radius:24px;border:2px solid var(--line);background:var(--card2);color:var(--text);font:inherit;cursor:pointer}
+.emo{font-size:1.6em}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px;border-radius:18px;background:var(--card2);border:2px solid #7c8cff;min-width:140px;margin:0 auto}
+.tile .pic{width:72px;height:72px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:3em;background:#0d0f12;overflow:hidden}
+.tile .pic img{width:100%;height:100%;object-fit:cover}
+.mini{width:44px;height:44px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;font-size:1.6em;background:#0d0f12;overflow:hidden}
+.mini img{width:100%;height:100%;object-fit:cover}
+.sentence{font-size:1.35em;line-height:1.45;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:20px}
+.sentence b{color:var(--green)}
+.start{justify-content:center;align-items:center;text-align:center;cursor:pointer;gap:22px}
+.start .logo{width:170px;height:170px}
+.start h1{font-size:2.2em}
+.start .first{font-size:1.25em;background:var(--card);border:2px solid var(--green2);border-radius:18px;padding:18px}
+.warn{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;border:2px solid var(--red);background:var(--redbg);cursor:pointer;text-align:left;color:var(--text);font:inherit;font-weight:700;width:100%}
+.warn.orange{border-color:var(--orange2);background:var(--orangebg)}
+.warn .ic{font-size:1.5em;line-height:1}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.neg{color:var(--red)}
+.note{padding:12px 14px;border-radius:14px;background:#1d2633;border:1px dashed #4b6488;font-size:.95em}
+.badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:8px;background:#5b4a14;color:#ffe08a;font-size:.75em;vertical-align:middle}
+.bottombar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;
+  max-width:480px;margin:0 auto;padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:#0d0f12;border-top:1px solid var(--line)}
+.navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:64px;justify-content:center;border-radius:16px;border:2px solid var(--line);background:var(--card2);color:var(--text);font:inherit;font-size:1.6em;cursor:pointer}
+.navbtn span{font-size:.45em;font-weight:700}
+.navbtn.gear{grid-column:2}
+.navbtn.home{grid-column:1;margin-right:10px}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .box{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:18px}
+.modal .box p{font-size:1.25em}
+.toast{white-space:nowrap;position:fixed;left:50%;top:24px;transform:translateX(-50%);z-index:30;background:var(--green2);color:#fff;padding:14px 22px;border-radius:30px;font-weight:700;font-size:1.1em;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.datepick{display:flex;align-items:center;gap:10px}
+.datepick div{flex:1;text-align:center;font-weight:700}
+.howto ol{margin:0;padding-left:1.3em}
+.howto li{margin:6px 0}
+/* Seite B */
+.datebtn{background:var(--card);border:2px solid var(--line);border-radius:16px;min-height:56px;color:var(--text);font:inherit;font-weight:700;font-size:1.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.overview{display:flex;gap:16px;align-items:stretch}
+.barcol{flex:none;width:104px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bar{position:relative;width:84px;height:280px;border-radius:14px;border:3px solid var(--line);background:#0d0f12;overflow:hidden}
+.seg{position:absolute;left:0;right:0}
+.seg.grey{background:var(--grey)}
+.seg.food{background:var(--food)}
+.seg.free{background:var(--green2)}
+.seg.coming{border:3px dashed #b9f5c4;background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 5px,transparent 5px 10px)}
+.seg.short{border:3px dashed var(--red);background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,92,92,.25) 6px 12px)}
+.saveline{position:absolute;left:-3px;right:-3px;border-top:3px dashed #fff}
+.barnum{font-weight:700;font-size:1.05em;text-align:center}
+.legend{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0}
+.legend .total{font-size:.95em;color:var(--muted)}
+.legend .total b{display:block;font-size:2em;color:var(--text);line-height:1.1}
+.legend .total b.neg{color:var(--red)}
+.lg{display:flex;gap:10px;align-items:flex-start;font-size:.92em}
+.lg i{flex:none;width:20px;height:20px;border-radius:5px;margin-top:2px}
+.lg b{display:block;font-size:1.15em}
+.titlebtn{width:100%;background:transparent;border:2px solid var(--line);border-radius:14px;min-height:52px;color:var(--text);font:inherit;font-weight:700;font-size:1.15em;cursor:pointer}
+.today{font-size:1.15em;padding:16px;border-radius:18px;background:#16301f;border:2px solid var(--green2);text-align:center}
+.today b{display:block;font-size:1.8em;color:var(--green)}
+.hint{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.hint svg{flex:none}
+.actbtn{min-height:84px;font-size:1.35em;border-width:3px}
+.actbtn.out{border-color:var(--orange2);background:#2c2014}
+.actbtn.in{border-color:var(--green2);background:#15281c}
+.actbtn .sym{font-size:1.4em;line-height:1}
+
+.sug{display:flex;gap:12px;align-items:flex-start;border:2px solid #7c8cff}
+.potrow{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.potrow:last-child{border-bottom:0}
+.potrow .ph{display:flex;gap:10px;align-items:center}
+.potrow .ph small{display:block;color:var(--muted);font-size:.8em}
+.potrow .pr{text-align:right;font-weight:700;white-space:nowrap}
+.potrow .pr small{display:block;font-weight:400;font-size:.75em;color:var(--muted)}
+.hbar{height:18px;border-radius:9px;background:#0d0f12;border:2px solid var(--line);overflow:hidden}
+.hbar i{display:block;height:100%;background:var(--orange)}
+.hbar i.over{background:var(--red)}
+/* Seite C */
+.clegend{display:flex;flex-wrap:wrap;gap:6px}
+.clegend .ci{min-height:auto;padding:4px 10px;font-size:.78em;cursor:default;width:auto}
+.days{display:flex;flex-direction:column;gap:6px}
+.day{display:flex;gap:10px;align-items:stretch;padding:8px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.day.empty{padding:4px 8px;background:transparent;border-color:transparent}
+.day.empty .dl b{font-size:1em;color:var(--muted)}
+.day.today{border:3px solid var(--green);background:#16241b}
+.dl{flex:none;width:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.dl b{font-size:1.4em}
+.dl small{color:var(--muted)}
+.dl em{font-style:normal;font-size:.7em;font-weight:700;color:var(--green)}
+.dtx{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ci{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;border:0;border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer;min-height:48px}
+.ci .amt{font-weight:700}
+.ci .lbl{font-size:.88em}
+.ci.out-once{background:#ffc48a;color:#3d2100}
+.ci.in-once{background:#8fe39b;color:#0f3318}
+.ci.out-rec{background:#e07a1f;color:#fff}
+.ci.in-rec{background:#2f9e5b;color:#fff}
+.ci.later{opacity:.55;border:2px dashed rgba(255,255,255,.6)}
+/* Seite D / E */
+.txtop{display:flex;gap:14px;align-items:center}
+.bar.slim{width:44px;height:110px;border-width:2px;border-radius:10px}
+.txtop .mg{flex:none;text-align:left;font-size:.9em;color:var(--muted)}
+.txtop .mg b{display:block;font-size:1.3em;color:var(--text)}
+.txtop .mg b.neg{color:var(--red)}
+.daterow{flex:1;display:flex;align-items:center;gap:8px}
+.daterow .d{flex:1;text-align:center;font-weight:700;line-height:1.2}
+.daterow .d small{display:block;font-weight:400;color:var(--muted)}
+.daterow .btn{width:52px;min-height:56px;padding:0;font-size:1.3em}
+.pottiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:16px;border:3px solid var(--line);background:var(--card2);color:var(--text);font:inherit;cursor:pointer;min-height:118px;justify-content:center}
+.pt.sel{border-color:var(--orange2);background:#2c2014}
+.pt .mini{width:52px;height:52px;font-size:2em}
+.pt b{font-size:.85em;line-height:1.15;text-align:center;word-break:break-word}
+.pt small{font-size:.75em;color:var(--muted)}
+.pt small.neg{color:var(--red)}
+.sentence.out b{color:var(--orange)}
+.hd-out{color:var(--orange)} .hd-in{color:var(--green)}
+.screen.withbar .footer.stick{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom));z-index:4;background:var(--bg);padding:10px 0 4px;margin-top:auto}
+.tx .key{min-height:54px}
+.tx .amount{font-size:2.2em;padding:4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* =========================================================
+   MEIN GELD
+   Schritt 1: Datenmodell, Rechenlogik, Seite A + O
+   Schritt 3: Seite B
+   ========================================================= */
+
+/* ---------- Speicher ---------- */
+const KEY = 'meinGeld.v1';
+let storageOk = true;
+function defaultSettings(){
+  return { devMode: true, testDate: null, readAloud: true, fontSize: 'normal', showCents: true,
+           horizon: 'month',   // 'month' = bis Monatsende, 'payday' = bis zum nächsten Geld-Tag
+           buysFood: true };   // Kauft die Person von dem Geld ihr Essen?
+}
+function blank(){
+  return {
+    version: 1,
+    setupDone: false,
+    profile: { name: '' },
+    settings: defaultSettings(),
+    start: null,            // { amount (Cent, kann negativ sein), date 'JJJJ-MM-TT' }
+    recurring: [],          // { id, type:'in'|'out', name, amount, rhythm:'week'|'month'|'year', weekday, day, month, validFrom, validTo }
+    pots: [],               // { id, food:bool, name, emoji, photo, amount }  Essen: pro Tag, sonst pro Monat
+    bookings: []            // { id, type:'in'|'out', date, amount, text, potId }
+  };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || blank(); }
+catch(e){ S = blank(); storageOk = false; }
+S.settings = Object.assign(defaultSettings(), S.settings || {});
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ storageOk = false; } }
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+/* ---------- Datum ---------- */
+const pad = n => String(n).padStart(2, '0');
+const ds = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+const pd = s => s.split('-').map(Number);
+const dim = (y, m) => new Date(y, m, 0).getDate();
+const toDate = s => { const [y, m, d] = pd(s); return new Date(y, m - 1, d); };
+const fromDate = D => ds(D.getFullYear(), D.getMonth() + 1, D.getDate());
+const addDays = (s, n) => { const D = toDate(s); D.setDate(D.getDate() + n); return fromDate(D); };
+const diffDays = (a, b) => Math.round((toDate(b) - toDate(a)) / 864e5);
+const maxS = (a, b) => a > b ? a : b;
+const minS = (a, b) => a < b ? a : b;
+const realToday = () => fromDate(new Date());
+const today = () => (S.settings.devMode && S.settings.testDate) || realToday();
+const WD = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MON = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+function fmtDate(s){ const [y,m,d] = pd(s); return `${WD[toDate(s).getDay()]}, ${d}. ${MON[m-1]} ${y}`; }
+function fmtDay(s){ const [,m,d] = pd(s); return `${d}. ${MON[m-1]}`; }
+
+/* ---------- Geld ---------- */
+function money(c){
+  const o = S.settings.showCents ? {minimumFractionDigits:2, maximumFractionDigits:2} : {maximumFractionDigits:0};
+  return new Intl.NumberFormat('de-DE', o).format(c / 100).replace('-', '−') + '\u00a0€';
+}
+function numToCents(s){
+  if(!s) return 0;
+  const [a, b = ''] = s.split(',');
+  return (parseInt(a || '0', 10) * 100) + parseInt((b + '00').slice(0, 2), 10);
+}
+function centsToNum(c){
+  if(!c) return '';
+  const e = Math.floor(c / 100), r = c % 100;
+  return r ? `${e},${pad(r)}`.replace(/0$/, '') : String(e);
+}
+const sum = list => list.reduce((a, x) => a + x.amount, 0);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =========================================================
+   RECHENLOGIK
+   ========================================================= */
+
+/* Termine einer regelmäßigen Zahlung zwischen from und to (inklusive).
+   "Am 31." wird in kürzeren Monaten am letzten Tag gebucht. */
+function occ(r, from, to){
+  let a = from, b = to;
+  if(r.validFrom) a = maxS(a, r.validFrom);
+  if(r.validTo) b = minS(b, r.validTo);
+  if(a > b) return [];
+  const out = [];
+  const [ay, am] = pd(a), [by, bm] = pd(b);
+  if(r.rhythm === 'month'){
+    let y = ay, m = am;
+    while(y < by || (y === by && m <= bm)){
+      const s = ds(y, m, Math.min(r.day, dim(y, m)));
+      if(s >= a && s <= b) out.push(s);
+      if(++m > 12){ m = 1; y++; }
+    }
+  } else if(r.rhythm === 'year'){
+    for(let y = ay; y <= by; y++){
+      const s = ds(y, r.month, Math.min(r.day, dim(y, r.month)));
+      if(s >= a && s <= b) out.push(s);
+    }
+  } else {
+    const D = toDate(a);
+    D.setDate(D.getDate() + ((r.weekday - D.getDay() + 7) % 7));
+    for(let s = fromDate(D); s <= b; s = addDays(s, 7)) out.push(s);
+  }
+  return out;
+}
+
+/* Alle Buchungen zwischen from und to.
+   Regelmäßige werden erst NACH dem Starttag gebucht (am Starttag steckt alles im Startbetrag).
+   ignoreStart=true: Plan für den ganzen Monat, unabhängig vom Starttag. */
+function txs(from, to, ignoreStart){
+  const list = [];
+  for(const b of S.bookings) if(b.date >= from && b.date <= to) list.push({ ...b, kind: 'once' });
+  let rf = from;
+  if(!ignoreStart && S.start) rf = maxS(rf, addDays(S.start.date, 1));
+  for(const r of S.recurring)
+    for(const d of occ(r, rf, to))
+      list.push({ id: r.id + '@' + d, recId: r.id, date: d, type: r.type, amount: r.amount, text: r.name, kind: 'rec' });
+  return list.sort((x, y) => x.date < y.date ? -1 : x.date > y.date ? 1 : 0);
+}
+
+function balance(asOf){
+  if(!S.start || asOf < S.start.date) return 0;
+  let v = S.start.amount;
+  for(const t of txs(S.start.date, asOf)) v += t.type === 'in' ? t.amount : -t.amount;
+  return v;
+}
+
+/* Nächster / letzter Geld-Tag = Termin einer regelmäßigen Einnahme */
+const activeIncomes = () => S.recurring.filter(r => r.type === 'in' && !r.validTo);
+function nextPayday(t){
+  let best = null;
+  for(const r of activeIncomes()){ const o = occ(r, addDays(t, 1), addDays(t, 400)); if(o.length && (!best || o[0] < best)) best = o[0]; }
+  return best;
+}
+function lastPayday(t){
+  let best = null;
+  for(const r of activeIncomes()){ const o = occ(r, addDays(t, -400), t); if(o.length){ const x = o[o.length - 1]; if(!best || x > best) best = x; } }
+  return best;
+}
+
+function calc(){
+  const t = today();
+  const [y, m, d] = pd(t);
+  const n = dim(y, m);
+  const mS = ds(y, m, 1), mE = ds(y, m, n);
+  const st = S.settings;
+
+  const bal = balance(t);
+  const plan = txs(mS, mE, true).filter(x => x.kind === 'rec');
+  const monthIn  = sum(plan.filter(x => x.type === 'in'));
+  const monthFix = sum(plan.filter(x => x.type === 'out'));
+
+  // Zeitraum: bis Monatsende oder bis zum nächsten Geld-Tag
+  let mode = 'month', E = mE, left = n - d + 1, pStart = mS, frame = monthIn, payday = null;
+  let title = `Geld für ${MON[m - 1]}`, until = 'bis zum Monatsende';
+  if(st.horizon === 'payday'){
+    const np = nextPayday(t);
+    if(np){
+      mode = 'payday'; payday = np; E = addDays(np, -1); left = diffDays(t, np);
+      const lp = lastPayday(t);
+      pStart = lp ? lp : (S.start ? S.start.date : t);
+      frame = lp ? sum(activeIncomes().filter(r => occ(r, lp, lp).length)) : 0;
+      const name = left <= 7 ? WD[toDate(np).getDay()] : fmtDay(np);
+      title = `Geld bis ${name}`; until = left <= 7 ? `bis ${name}` : `bis zum ${fmtDay(np)}`;
+    }
+  }
+  if(S.start) pStart = maxS(pStart, S.start.date);
+
+  // Regelmäßige Zahlungen, die bis zum Ende des Zeitraums noch kommen
+  const later = t < E ? txs(addDays(t, 1), E).filter(x => x.kind === 'rec') : [];
+  const pendList = later.filter(x => x.type === 'out');
+  const pending = sum(pendList);
+  const pendingIn = sum(later.filter(x => x.type === 'in'));   // Geld, das sicher noch kommt
+  const pool = Math.max(0, bal + pendingIn);                    // Geld jetzt + Geld, das noch kommt
+  const free = bal + pendingIn - pending;
+
+  const food = S.pots.find(p => p.food);
+  const perDay = (st.buysFood && food) ? food.amount : 0;
+  const RE = perDay * left;
+  const dayMoney = left > 0 ? Math.floor(Math.max(0, free) / left) : 0;
+
+  const prevEnd = addDays(pStart, -1);
+  const saved = (S.start && prevEnd >= S.start.date) ? Math.max(0, balance(prevEnd)) : 0;
+
+  const soFar = S.start ? txs(maxS(mS, S.start.date), t) : [];
+  const inSoFar  = sum(soFar.filter(x => x.type === 'in'));
+  const outSoFar = sum(soFar.filter(x => x.type === 'out'));
+
+  const pots = S.pots.filter(p => !p.food || st.buysFood).map(p => {
+    const monthly = p.food ? p.amount * n : p.amount;
+    const spent = sum(S.bookings.filter(b => b.type === 'out' && b.potId === p.id && b.date >= mS && b.date <= mE));
+    return { ...p, monthly, spent, rest: monthly - spent };
+  });
+
+  const warnings = [];
+  if(bal < 0) warnings.push({ level: 'red', text: `Achtung! Du hast kein Geld mehr. Du bist ${money(-bal)} im Minus.` });
+  else if(free < 0) warnings.push({ level: 'red', text: `Achtung! Dein Geld reicht nicht für die festen Kosten ${until}. Es fehlen ${money(-free)}.` });
+  if(st.buysFood && free < RE) warnings.push({ level: 'red', text: `Achtung! Dein Geld reicht nicht mehr fürs Essen ${until}. Es fehlen ${money(RE - Math.max(free, 0))}.` });
+  for(const p of pots){
+    if(p.food || p.monthly <= 0) continue;
+    if(p.rest < 0) warnings.push({ level: 'orange', text: `Dein Geld für ${p.name} ist für diesen Monat alle. Du hast ${money(-p.rest)} mehr ausgegeben.` });
+    else if(p.rest === 0) warnings.push({ level: 'orange', text: `Dein Geld für ${p.name} ist für diesen Monat alle.` });
+  }
+
+  return { t, y, m, d, n, mS, mE, mode, E, left, pStart, frame, payday, title, until,
+           bal, monthIn, monthFix, pending, pendList, pendingIn, pool, free, perDay, RE, dayMoney, saved, inSoFar, outSoFar, pots, warnings };
+}
+
+/* =========================================================
+   LOGO: Smiley-Münze
+   ========================================================= */
+function smiley(size){
+  return `<svg width="${size}" height="${size}" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle r="100" fill="#f5c542" stroke="#b8860b" stroke-width="8"/>
+    <text x="-34" y="-8" text-anchor="middle" font-size="48" font-weight="700" fill="#5a4100" font-family="Arial,sans-serif">€</text>
+    <text x="34" y="-8" text-anchor="middle" font-size="48" font-weight="700" fill="#5a4100" font-family="Arial,sans-serif">€</text>
+    <path d="M0 -2 V16" stroke="#8a6400" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-38 36 Q0 60 38 36" fill="none" stroke="#5a4100" stroke-width="8" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* =========================================================
+   OBERFLÄCHE
+   ========================================================= */
+const app = document.getElementById('app');
+const V = { calMonth: '', cDetail: null, view: 'A', oStep: 0, num: '', err: '', ed: null, modal: null, gsub: null, unlocked: false, pinBuf: '', potPage: 0, newName: '' };
+let D = null;
+
+/* Vorlesen: Bildschirm ist gesperrt, einmal Tippen beendet es */
+function speak(text){
+  if(!('speechSynthesis' in window)){ toast('Vorlesen geht auf diesem Gerät nicht'); return; }
+  stopSpeak();
+  const ov = document.createElement('div');
+  ov.className = 'speakov'; ov.id = 'speakov';
+  ov.innerHTML = `<div class="big">🔊</div><div>Ich lese vor …</div><div class="muted">Tippe, um aufzuhören.</div>`;
+  ov.addEventListener('click', stopSpeak);
+  document.body.appendChild(ov);
+  try {
+    const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; u.rate = 0.9;
+    u.onend = u.onerror = () => { const o = document.getElementById('speakov'); if(o) o.remove(); };
+    speechSynthesis.speak(u);
+  } catch(e){ stopSpeak(); }
+}
+function stopSpeak(){ try { speechSynthesis.cancel(); } catch(e){} const o = document.getElementById('speakov'); if(o) o.remove(); }
+const speakBtn = text => S.settings.readAloud ? `<button class="speak" data-a="speak" data-v="${esc(text)}" aria-label="Vorlesen">🔊</button>` : '';
+
+function toast(t){
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = t;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1600);
+}
+function ask(text, yes, fn, danger, no){
+  dialog(text, [{ label: no || 'Nein' }, { label: yes, cls: danger ? 'danger' : 'primary', fn }]);
+}
+/* Dialog mit beliebig vielen Knöpfen: buttons = [{label, cls, fn}] */
+let dialogBtns = [];
+function dialog(text, buttons){ V.modal = { text }; dialogBtns = buttons; render(); }
+
+function render(){
+  const views = { A: vA, O: vO, hint: vHint, B: vB, G: vG, D: vTx, E: vTx, C: () => V.cDetail ? vCDetail() : vC(), F: vF };
+  let html = (V.gsub === 'pinCheck' && V.view !== 'G') ? pinScreen('PIN eingeben', V.pinWhy, `<button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button>`) : (views[V.view] || vA)();
+  if(!storageOk) html = `<div class="note" style="margin:10px">⚠️ Dieser Browser speichert gerade nichts. Deine Eingaben gehen beim Schließen verloren.</div>` + html;
+  if(V.modal){
+    const many = dialogBtns.length > 2;
+    html += `<div class="modal"><div class="box"><p>${esc(V.modal.text)}</p>
+      <div class="${many ? 'list' : 'row'}">${dialogBtns.map((b, i) => `<button class="btn ${b.cls || ''}" data-a="dlg" data-v="${i}">${esc(b.label)}</button>`).join('')}</div></div></div>`;
+  }
+  document.documentElement.style.setProperty('--fs', FS[S.settings.fontSize] || FS.normal);
+  app.innerHTML = html;
+  const f = app.querySelector('[autofocus]'); if(f && !V.modal) setTimeout(() => f.focus(), 50);
+}
+function bar(){
+  return `<nav class="bottombar">
+    <button class="navbtn home" data-a="go" data-v="B" aria-label="Start">🏠<span>Start</span></button>
+    <button class="navbtn gear" data-a="go" data-v="G" aria-label="Einstellungen">⚙️<span>Einstellungen</span></button>
+  </nav>`;
+}
+function warnHtml(c){
+  return c.warnings.slice(0, 2).map(w =>
+    `<button class="warn ${w.level === 'orange' ? 'orange' : ''}" data-a="warn"><span class="ic">${w.level === 'orange' ? '🟠' : '⚠️'}</span><span>${esc(w.text)}</span></button>`).join('');
+}
+function rhythmText(r){
+  if(r.rhythm === 'week') return `jeden ${WD[r.weekday]}`;
+  if(r.rhythm === 'year') return `jedes Jahr am ${r.day}. ${MON[r.month - 1]}`;
+  return `jeden Monat am ${r.day}.`;
+}
+function potPic(p, cls){
+  const inner = p.photo ? `<img src="${p.photo}" alt="">` : esc(p.emoji || '💶');
+  return `<div class="${cls || 'mini'}">${inner}</div>`;
+}
+
+/* ---------- Seite A ---------- */
+function vA(){
+  const first = !S.setupDone;
+  return `<div class="screen start" data-a="startTap">
+    <div class="logo">${smiley(170)}</div>
+    <h1>${first ? 'Mein Geld' : `Hallo ${esc(S.profile.name)}!`}</h1>
+    ${first
+      ? `<div class="first">Hallo! Wer bist du?<br><b>Hier geht es los. 👉</b></div>`
+      : `<p class="muted">Tippe irgendwo hin.</p>
+         <button class="btn primary big" style="max-width:300px" data-a="startTap">✓ Los geht's</button>`}
+  </div>`;
+}
+
+/* ---------- Seite O: Ersteinrichtung ---------- */
+function oSteps(){
+  const s = ['welcome','name','minus','amount','in','out','horizon','buysFood'];
+  if(D.buysFood) s.push('food');
+  s.push('pots','done');
+  return s;
+}
+const curStep = () => oSteps()[V.oStep];
+function newDraft(){ return { name: '', neg: null, start: 0, rec: [], horizon: null, buysFood: null, food: 0, pots: [] }; }
+function enterStep(i){
+  V.oStep = i; V.err = '';
+  const s = curStep();
+  if(s === 'amount') V.num = centsToNum(Math.abs(D.start));
+  if(s === 'food') V.num = centsToNum(D.food);
+  render(); window.scrollTo(0, 0);
+}
+function leaveStep(){
+  const s = curStep();
+  if(s === 'amount') D.start = numToCents(V.num) * (D.neg ? -1 : 1);
+  if(s === 'food') D.food = numToCents(V.num);
+}
+function numpad(neg){
+  const keys = ['1','2','3','4','5','6','7','8','9',',','0','del'];
+  return `<div class="amount ${neg ? 'neg' : ''}">${neg ? '−' : ''}${V.num || '0'} <span>€</span></div>
+    <div class="numpad">${keys.map(k => `<button class="key" data-a="key" data-v="${k}" aria-label="${k === 'del' ? 'Löschen' : k}">${k === 'del' ? '⌫' : k}</button>`).join('')}</div>`;
+}
+function qhead(text, sub){
+  const n = oSteps().length;
+  return `<div class="dots">${Array.from({length: n}, (_, i) => `<i class="${i <= V.oStep ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="qhead"><h1>${esc(text)}</h1>${speakBtn(text + (sub ? '. ' + sub : ''))}</div>
+    ${sub ? `<p class="muted">${esc(sub)}</p>` : ''}`;
+}
+function navFooter(nextLabel){
+  return `<div class="footer">
+    ${V.oStep > 0 ? `<button class="btn" data-a="oback">◀ Zurück</button>` : ''}
+    <button class="btn primary" data-a="onext">${nextLabel || 'Weiter ▶'}</button></div>`;
+}
+const choice = (act, val, cur, label, sub) =>
+  `<button class="btn big choice ${cur === val ? 'sel' : ''}" data-a="${act}" data-v="${val}">${cur === val ? '✓ ' : ''}${label}${sub ? `<span class="sub">${sub}</span>` : ''}</button>`;
+
+function vO(){
+  if(V.ed) return vEditor();
+  const s = curStep(), err = V.err ? `<p class="err">${esc(V.err)}</p>` : '';
+  if(s === 'welcome') return `<div class="screen">${qhead('Willkommen bei Mein Geld!', 'Hier richtest du deine App ein. Das dauert ein paar Minuten.')}
+      <div style="margin:10px auto">${smiley(150)}</div>
+      <div class="card">Die App hilft dir, dein Geld im Blick zu behalten.<br><br>Sie zeigt dir: <b>Reicht mein Geld noch bis zum Monatsende?</b></div>
+      ${navFooter("Los geht's ▶")}</div>`;
+  if(s === 'name') return `<div class="screen">${qhead('Wie heißt du?')}
+      <input type="text" data-in="name" value="${esc(D.name)}" placeholder="Dein Name" maxlength="30" autocomplete="given-name" autofocus>
+      ${err}${navFooter()}</div>`;
+  if(s === 'minus') return `<div class="screen">${qhead('Ist auf deinem Konto gerade ein Minus?', 'Wenn du nicht sicher bist: Schau auf deinen Kontoauszug oder frag deinen Betreuer.')}
+      ${choice('setNeg', 'no', D.neg === false ? 'no' : D.neg === true ? 'yes' : null, 'Nein, kein Minus')}
+      ${choice('setNeg', 'yes', D.neg === false ? 'no' : D.neg === true ? 'yes' : null, 'Ja, ich habe Minus')}
+      ${err}${navFooter()}</div>`;
+  if(s === 'amount') return `<div class="screen">${D.neg
+        ? qhead('Wie viel Minus hast du?', 'Schau auf deinen Kontoauszug.')
+        : qhead('Wie viel Geld hast du jetzt gerade?', 'Zähl alles zusammen: Geld im Portemonnaie und auf dem Konto.')}
+      ${numpad(D.neg)}${navFooter()}</div>`;
+  if(s === 'in' || s === 'out'){
+    const type = s;
+    const items = D.rec.filter(r => r.type === type);
+    const q = type === 'in' ? 'Bekommst du regelmäßig Geld?' : 'Musst du regelmäßig etwas bezahlen?';
+    const sub = type === 'in' ? 'Zum Beispiel Geld vom Jobcenter, Lohn oder Taschengeld.' : 'Zum Beispiel Handy, Strom oder Fahrkarte.';
+    return `<div class="screen">${qhead(q, sub)}
+      <div class="list">${items.map(r => `<div class="item ${type}-rec"><div class="t"><b>${esc(r.name)}</b>${money(r.amount)} · ${rhythmText(r)}</div>
+          <button class="x" data-a="delRec" data-v="${r.id}" aria-label="Löschen">✕</button></div>`).join('')}</div>
+      ${items.length
+        ? `<button class="btn" data-a="newRec" data-v="${type}">＋ Noch etwas</button>${navFooter()}`
+        : `<div class="footer" style="flex-direction:column">
+             <button class="btn primary big" data-a="newRec" data-v="${type}">Ja</button>
+             <div class="row"><button class="btn" data-a="oback">◀ Zurück</button><button class="btn" data-a="onext">Nein, weiter ▶</button></div></div>`}
+      </div>`;
+  }
+  if(s === 'horizon') return `<div class="screen">${qhead('Bis wann muss dein Geld reichen?', 'Das stellst du am besten mit deinem Betreuer ein.')}
+      ${choice('setHorizon', 'month', D.horizon, 'Bis zum Monatsende', 'Ich bekomme mein Geld einmal im Monat.')}
+      ${choice('setHorizon', 'payday', D.horizon, 'Bis zum nächsten Geld-Tag', 'Zum Beispiel: Ich bekomme jeden Montag Taschengeld.')}
+      ${D.horizon === 'payday' && !D.rec.some(r => r.type === 'in') ? `<p class="note">Du hast noch kein regelmäßiges Geld eingetragen. Dann rechnet die App bis zum Monatsende.</p>` : ''}
+      ${err}${navFooter()}</div>`;
+  if(s === 'buysFood') return `<div class="screen">${qhead('Kaufst du von dem Geld dein Essen?', 'Das stellst du am besten mit deinem Betreuer ein.')}
+      ${choice('setFood', 'yes', D.buysFood === true ? 'yes' : D.buysFood === false ? 'no' : null, 'Ja', 'Ich kaufe selbst ein.')}
+      ${choice('setFood', 'no', D.buysFood === true ? 'yes' : D.buysFood === false ? 'no' : null, 'Nein', 'Mein Essen ist schon bezahlt.')}
+      ${err}${navFooter()}</div>`;
+  if(s === 'food'){
+    const cents = numToCents(V.num);
+    return `<div class="screen">${qhead('Wie viel Geld brauchst du am Tag für Essen?', 'Für Frühstück, Mittag und Abendessen zusammen.')}
+      ${numpad(false)}
+      <p class="muted" style="text-align:center">${cents ? `Das sind im Monat ungefähr ${money(cents * 30)}.` : 'Tipp: Viele brauchen 5 bis 8 € am Tag.'}</p>
+      ${err}${navFooter()}</div>`;
+  }
+  if(s === 'pots') return `<div class="screen">${qhead('Willst du noch mehr Geld-Töpfe anlegen?', 'Ein Geld-Topf ist Geld, das du für etwas einplanst. Zum Beispiel: Geld für Kleidung. So behältst du besser den Überblick.')}
+      <div class="list">
+        ${D.buysFood ? `<div class="item pot">${potPic({emoji:'🍎'})}<div class="t"><b>Geld für Essen</b>${money(D.food)} am Tag</div></div>` : ''}
+        ${D.pots.map(p => `<div class="item pot">${potPic(p)}<div class="t"><b>Geld für ${esc(p.name)}</b>${money(p.amount)} im Monat</div>
+          <button class="x" data-a="delPot" data-v="${p.id}" aria-label="Löschen">✕</button></div>`).join('')}
+      </div>
+      ${D.pots.length >= 5 ? `<p class="muted">Du hast schon 5 Geld-Töpfe. Mehr geht nicht.</p>` : ''}
+      ${D.pots.length
+        ? `${D.pots.length < 5 ? `<button class="btn" data-a="newPot">＋ Noch ein Geld-Topf</button>` : ''}${navFooter()}`
+        : `<div class="footer" style="flex-direction:column">
+             <button class="btn primary big" data-a="newPot">Ja</button>
+             <div class="row"><button class="btn" data-a="oback">◀ Zurück</button><button class="btn" data-a="onext">Nein, weiter ▶</button></div></div>`}
+      </div>`;
+  // done
+  const ins = D.rec.filter(r => r.type === 'in').length, outs = D.rec.filter(r => r.type === 'out').length;
+  return `<div class="screen">${qhead('Fertig!', 'Schau noch einmal, ob alles stimmt.')}
+    <div class="card">
+      <div class="kv"><span>Name</span><b>${esc(D.name)}</b></div>
+      <div class="kv"><span>Geld jetzt</span><b class="${D.start < 0 ? 'neg' : ''}">${money(D.start)}</b></div>
+      <div class="kv"><span>Regelmäßig Geld bekommen</span><b>${ins}×</b></div>
+      <div class="kv"><span>Regelmäßig bezahlen</span><b>${outs}×</b></div>
+      <div class="kv"><span>Geld muss reichen</span><b>${D.horizon === 'payday' ? 'bis Geld-Tag' : 'bis Monatsende'}</b></div>
+      <div class="kv"><span>Essen am Tag</span><b>${D.buysFood ? money(D.food) : 'schon bezahlt'}</b></div>
+      <div class="kv"><span>Geld-Töpfe</span><b>${D.pots.length}</b></div>
+    </div>
+    <p class="muted">Du kannst alles später in den Einstellungen ändern.</p>
+    <div class="footer"><button class="btn" data-a="oback">◀ Zurück</button>
+      <button class="btn primary big" data-a="finish">✓ Fertig!</button></div></div>`;
+}
+
+/* ---------- Eingabe-Assistent ---------- */
+const SUGGEST = {
+  in:  ['Geld vom Jobcenter','Wochengeld vom Betreuer','Werkstatt-Lohn','Taschengeld','Rente','Kindergeld','Lohn','Barbetrag'],
+  out: ['Geld an Betreuer','Handy','Strom','Internet / Fernsehen','Spotify / Netflix','Verein / Fitness','Fahrkarte','Versicherung','Mittagessen Werkstatt','Raten / Schulden','Miete']
+};
+const EMOJIS = ['👕','🚬','🍺','🍫','🎮','🎁','🚌','💇','📱','🐶','🎬','☕','🧴','💊','🎉','⚽'];
+function edHead(title){ return `<div class="qhead"><h1>${esc(title)}</h1>${speakBtn(title)}</div>`; }
+function edFooter(){
+  return `<div class="footer"><button class="btn" data-a="edBack">${V.ed.sub === 0 ? '✕ Abbrechen' : '◀ Zurück'}</button>
+    <button class="btn primary" data-a="edNext">Weiter ▶</button></div>`;
+}
+function vEditor(){
+  const E = V.ed, x = E.data, err = V.err ? `<p class="err">${esc(V.err)}</p>` : '';
+  if(E.kind === 'pot'){
+    if(E.sub === 0) return `<div class="screen">${edHead(x.food ? 'Geld für Essen' : 'Wofür ist der Geld-Topf?')}
+        <div class="tile">${potPic(x, 'pic')}<b>Geld für ${esc(x.name || '…')}</b></div>
+        ${x.food ? '' : `<input type="text" data-in="edName" value="${esc(x.name || '')}" placeholder="z. B. Kleidung" maxlength="24">`}
+        ${E.editId && !x.food ? `<button class="btn danger" data-a="potDelete">🗑️ Diesen Geld-Topf löschen</button>` : ''}
+        <p class="muted">Such dir ein Bild aus:</p>
+        <div class="grid4">${EMOJIS.map(e => `<button class="btn ${!x.photo && x.emoji === e ? 'sel' : ''}" data-a="edEmoji" data-v="${e}"><span class="emo">${e}</span></button>`).join('')}</div>
+        <label class="btn">📷 Eigenes Foto wählen<input type="file" accept="image/*" data-in="photo" hidden></label>
+        ${err}${edFooter()}</div>`;
+    if(E.sub === 1) return `<div class="screen">${edHead(x.food ? 'Wie viel Geld brauchst du am Tag für Essen?' : `Wie viel Geld planst du im Monat für ${x.name} ein?`)}
+        ${numpad(false)}${err}${edFooter()}</div>`;
+    return `<div class="screen">${edHead('Stimmt das?')}
+        <div class="tile">${potPic(x, 'pic')}</div>
+        <div class="sentence">Du planst <b>${money(x.amount)}</b> ${x.food ? 'am Tag' : 'im Monat'} für <b>${esc(x.name)}</b> ein.</div>
+        <div class="footer"><button class="btn" data-a="edRestart">Nein, ändern</button><button class="btn primary" data-a="edSave">✓ Ja, speichern</button></div></div>`;
+  }
+  const isIn = E.kind === 'in';
+  if(E.sub === 0) return `<div class="screen">${edHead(isIn ? 'Wofür bekommst du das Geld?' : 'Wofür bezahlst du?')}
+      <input type="text" data-in="edName" value="${esc(x.name || '')}" placeholder="${isIn ? 'z. B. Taschengeld' : 'z. B. Handy'}" maxlength="30">
+      <div class="chips">${SUGGEST[E.kind].map(s => `<button class="chip" data-a="edChip" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+      ${err}${edFooter()}</div>`;
+  if(E.sub === 1) return `<div class="screen">${edHead(isIn ? `Wie viel Geld bekommst du für ${x.name}?` : `Wie viel bezahlst du für ${x.name}?`)}
+      ${numpad(false)}${err}${edFooter()}</div>`;
+  if(E.sub === 2) return `<div class="screen">${edHead('Wie oft?')}
+      ${[['week','Jede Woche'],['month','Jeden Monat'],['year','Jedes Jahr']].map(([k, l]) =>
+        `<button class="btn big ${x.rhythm === k ? 'sel' : ''}" data-a="edRhythm" data-v="${k}">${l}</button>`).join('')}
+      ${err}${edFooter()}</div>`;
+  if(E.sub === 3){
+    let body = '';
+    if(x.rhythm === 'week'){
+      body = `<div class="grid4">${[1,2,3,4,5,6,0].map(w => `<button class="btn ${x.weekday === w ? 'sel' : ''}" data-a="edWeekday" data-v="${w}">${WD_SHORT[w]}</button>`).join('')}</div>
+        ${x.weekday != null ? `<p style="text-align:center"><b>${WD[x.weekday]}</b></p>` : ''}`;
+    } else {
+      if(x.rhythm === 'year') body += `<p class="muted">Monat:</p><div class="grid3">${MON.map((mn, i) => `<button class="btn ${x.month === i + 1 ? 'sel' : ''}" data-a="edMonth" data-v="${i + 1}">${mn.slice(0, 3)}</button>`).join('')}</div><p class="muted">Tag:</p>`;
+      body += `<div class="grid7">${Array.from({length: 31}, (_, i) => `<button class="btn ${x.day === i + 1 ? 'sel' : ''}" data-a="edDay" data-v="${i + 1}">${i + 1}</button>`).join('')}</div>`;
+      if(x.day > 28) body += `<p class="muted">Hat ein Monat weniger Tage, nimmt die App den letzten Tag im Monat.</p>`;
+    }
+    const q = x.rhythm === 'week' ? 'An welchem Tag?' : x.rhythm === 'year' ? 'An welchem Datum?' : 'An welchem Tag im Monat?';
+    return `<div class="screen">${edHead(q)}${body}${err}${edFooter()}</div>`;
+  }
+  return `<div class="screen">${edHead('Stimmt das?')}
+      <div class="sentence">${isIn
+        ? `Du bekommst <b>${money(x.amount)}</b> für <b>${esc(x.name)}</b>.<br>Das Geld kommt <b>${rhythmText(x)}</b>`
+        : `Du bezahlst <b>${money(x.amount)}</b> für <b>${esc(x.name)}</b>.<br>Das Geld geht <b>${rhythmText(x)}</b> weg.`}</div>
+      <div class="footer"><button class="btn" data-a="edRestart">Nein, ändern</button><button class="btn primary" data-a="edSave">✓ Ja, speichern</button></div></div>`;
+}
+function edNext(){
+  const E = V.ed, x = E.data; V.err = '';
+  const fail = msg => { V.err = msg; render(); };
+  if(E.sub === 0){ if(!(x.name || '').trim()) return fail(E.kind === 'pot' ? 'Bitte schreib, wofür der Geld-Topf ist.' : 'Bitte schreib, wofür das Geld ist.'); x.name = x.name.trim(); V.num = centsToNum(x.amount); }
+  if(E.sub === 1){
+    x.amount = numToCents(V.num); if(!x.amount) return fail('Bitte gib einen Betrag ein.');
+    if(x.food && x.amount < 500){
+      const next = () => { E.sub++; setTimeout(() => window.scrollTo(0, 0)); };
+      return dialog(`Du hast ${money(x.amount)} am Tag eingegeben. Das ist sehr wenig für einen ganzen Tag. Unser Vorschlag: 5\u00a0€ am Tag.`, [
+        { label: '5\u00a0€ nehmen', cls: 'primary', fn: () => { x.amount = 500; next(); } },
+        { label: `Bei ${money(x.amount)} bleiben`, fn: next },
+        { label: 'Neuen Betrag eingeben', fn: () => { V.num = ''; } }
+      ]);
+    }
+  }
+  if(E.kind !== 'pot'){
+    if(E.sub === 2 && !x.rhythm) return fail('Bitte wähl aus, wie oft.');
+    if(E.sub === 3){
+      if(x.rhythm === 'week' && x.weekday == null) return fail('Bitte wähl einen Tag.');
+      if(x.rhythm === 'month' && !x.day) return fail('Bitte wähl einen Tag.');
+      if(x.rhythm === 'year' && (!x.day || !x.month)) return fail('Bitte wähl Monat und Tag.');
+    }
+  }
+  E.sub++; render(); window.scrollTo(0, 0);
+}
+
+/* ---------- Homescreen-Hinweis ---------- */
+function vHint(){
+  const txt = 'Tipp: Leg die App auf deinen Startbildschirm. Dann findest du sie schnell, und deine Daten bleiben sicher gespeichert.';
+  return `<div class="screen">
+    <div class="qhead"><h1>Tipp: Leg die App auf deinen Startbildschirm</h1>${speakBtn(txt)}</div>
+    <p>Dann findest du sie schnell. Und deine Daten bleiben sicher gespeichert.</p>
+    <div class="card howto"><h2>🤖 Android</h2><ol><li>Tippe oben rechts auf <b>⋮</b></li><li>Tippe auf <b>„Zum Startbildschirm hinzufügen“</b></li><li>Tippe auf <b>„Hinzufügen“</b></li></ol></div>
+    <div class="card howto"><h2>🍎 iPhone</h2><ol><li>Tippe unten auf <b>Teilen</b> (Viereck mit Pfeil ⬆️)</li><li>Tippe auf <b>„Zum Home-Bildschirm“</b></li><li>Tippe auf <b>„Hinzufügen“</b></li></ol></div>
+    ${S.settings.devMode ? `<div class="note">🧪 Test-Hinweis: Das klappt erst richtig, wenn die App am Ende veröffentlicht ist.</div>` : ''}
+    <div class="footer"><button class="btn primary big" data-a="go" data-v="B">✓ Verstanden</button></div></div>`;
+}
+
+/* ---------- Seite B: Übersicht ---------- */
+function moneyBar(c, H){
+  const st = S.settings;
+  const need = c.pending + c.RE;
+  const scale = Math.max(c.frame, c.pool, need, 1);
+  const px = v => Math.max(0, v) / scale * H;
+  const bal = c.pool;
+  const g = Math.min(c.pending, bal), f = Math.min(c.RE, bal - g), fr = bal - g - f;
+  let y = 0, html = '';
+  const seg = (cls, v) => { if(v <= 0) return; html += `<div class="seg ${cls}" style="bottom:${px(y)}px;height:${px(v)}px"></div>`; y += v; };
+  seg('grey', g); seg('food', f); seg('free', fr);
+  const have = Math.max(0, c.bal);
+  if(c.pool > have) html += `<div class="seg coming" style="bottom:${px(have)}px;height:${px(c.pool - have)}px"></div>`;
+  if(need > bal) html += `<div class="seg short" style="bottom:${px(bal)}px;height:${px(need - bal)}px"></div>`;
+  if(c.saved > 0 && c.bal - c.saved > 0) html += `<div class="saveline" style="bottom:${px(c.bal - c.saved)}px"></div>`;
+  return `<div class="bar" role="img" aria-label="${esc(`${c.title}: ${money(c.bal)}`)}">${html}</div>`;
+}
+function vB(){
+  const c = calc(), st = S.settings;
+  const L = c.left === 1 ? 'heute' : `noch ${c.left} Tage`;
+  const gU = Math.min(c.pending, c.pool), fU = Math.min(c.RE, c.pool - gU);
+  const freeAfter = c.pool - gU - fU;
+  const coming = c.pool - Math.max(0, c.bal);
+  return `<div class="screen withbar">
+    <button class="datebtn" data-a="toC">📅 ${fmtDate(c.t)}${st.devMode && st.testDate ? '<span class="badge">Test</span>' : ''}</button>
+    ${warnHtml(c)}
+    <button class="titlebtn" data-a="toF">${esc(c.title)} ›</button>
+    <div class="overview">
+      <div class="barcol">${moneyBar(c, 280)}</div>
+      <div class="legend">
+        <div class="total">Mein Geld<b class="${c.bal < 0 ? 'neg' : ''}">${money(c.bal)}</b></div>
+        ${coming > 0 ? `<div class="lg"><i style="border:3px dashed #b9f5c4;background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 4px,transparent 4px 8px)"></i><span><b>${money(coming)}</b>kommen noch ${esc(c.until)}</span></div>` : ''}
+        ${c.pending > 0 ? `<div class="lg"><i style="background:var(--grey)"></i><span><b>${money(c.pending)}</b>feste Kosten, die noch abgehen</span></div>` : ''}
+        ${st.buysFood && c.RE > 0 ? `<div class="lg"><i style="background:var(--food)"></i><span><b>${money(c.RE)}</b>für Essen ${esc(c.until)} (${L})</span></div>` : ''}
+        <div class="lg"><i style="background:var(--green2)"></i><span><b>${money(Math.max(0, freeAfter))}</b>frei</span></div>
+        ${c.pending + c.RE > c.pool ? `<div class="lg"><i style="border:3px dashed var(--red)"></i><span><b class="neg">${money(c.pending + c.RE - c.pool)}</b>fehlt</span></div>` : ''}
+      </div>
+    </div>
+    ${c.mode === 'payday' ? `<div class="today">Du kannst heute noch etwa<b>${money(c.dayMoney)}</b>ausgeben.</div>` : ''}
+    ${c.saved > 0 ? `<div class="hint">${smiley(44)}<span>Du hast schon <b>${money(c.saved)}</b> gespart. Super! 👍</span></div>` : ''}
+    <button class="btn actbtn out" data-a="toD"><span class="sym">−</span> Ausgabe</button>
+    <button class="btn actbtn in" data-a="toE"><span class="sym">＋</span> Einnahme</button>
+  </div>${bar()}`;
+}
+
+/* ---------- Seite D (Geld ausgegeben) und E (Geld bekommen) ---------- */
+const IN_SUGGEST = ['Geburtstag','Geschenk','Pfand','Verkauft','Geld zurück'];
+function dayLabel(s){
+  const t = today(), n = diffDays(s, t);
+  const pre = n === 0 ? 'Heute' : n === 1 ? 'Gestern' : n === 2 ? 'Vorgestern' : WD[toDate(s).getDay()];
+  return `${pre}<small>${fmtDay(s)}</small>`;
+}
+function newTx(type){ return { type, step: 0, date: today(), potId: null, text: '', amount: 0 }; }
+function txTop(c){
+  const X = V.tx, minD = S.start ? S.start.date : X.date;
+  return `<div class="txtop">
+    ${moneyBar(c, 110).replace('class="bar"', 'class="bar slim"')}
+    <div class="mg">Mein Geld<b class="${c.bal < 0 ? 'neg' : ''}">${money(c.bal)}</b></div>
+    <div class="daterow">
+      <button class="btn" data-a="txDay" data-v="-1" ${X.date <= minD ? 'disabled' : ''} aria-label="Einen Tag früher">◀</button>
+      <div class="d">${dayLabel(X.date)}</div>
+      <button class="btn" data-a="txDay" data-v="1" ${X.date >= today() ? 'disabled' : ''} aria-label="Einen Tag später">▶</button>
+    </div></div>`;
+}
+function potName(id){ const p = S.pots.find(x => x.id === id); return p ? p : null; }
+function txWhat(X){
+  if(X.type === 'in') return esc(X.text);
+  if(X.potId && X.potId !== 'other'){ const p = potName(X.potId); return `${p.photo ? '' : esc(p.emoji) + ' '}${esc(p.name)}${X.text ? ` (${esc(X.text)})` : ''}`; }
+  return esc(X.text);
+}
+/* ---------- Seite F: Monats-Übersicht ---------- */
+/* Vorschläge: In den letzten 3 vollen Monaten immer > 20 % mehr oder weniger ausgegeben */
+function potSuggestions(){
+  if(!S.start) return [];
+  const t = today(); let [y, m] = pd(t);
+  const months = [];
+  for(let i = 0; i < 3; i++){ m--; if(m < 1){ m = 12; y--; } months.push([y, m]); }
+  if(ds(months[2][0], months[2][1], 1) < S.start.date) return [];   // noch keine 3 vollen Monate
+  const cur = t.slice(0, 7), out = [];
+  for(const p of S.pots){
+    if(p.food && !S.settings.buysFood) continue;
+    if(!p.amount || (S.dismissed && S.dismissed[p.id] === cur)) continue;
+    const r = months.map(([yy, mm]) => {
+      const a = ds(yy, mm, 1), e = ds(yy, mm, dim(yy, mm));
+      const spent = sum(S.bookings.filter(b => b.type === 'out' && b.potId === p.id && b.date >= a && b.date <= e));
+      const plan = p.food ? p.amount * dim(yy, mm) : p.amount;
+      return { spent, plan, days: dim(yy, mm) };
+    });
+    const more = r.every(x => x.spent > x.plan * 1.2), less = r.every(x => x.spent < x.plan * 0.8);
+    if(!more && !less) continue;
+    const avg = sum(r.map(x => ({ amount: x.spent }))) / 3;
+    let sug;
+    if(p.food){ sug = Math.max(500, Math.round(avg / 30 / 50) * 50); }
+    else sug = Math.max(500, Math.round(avg / 500) * 500);
+    if(sug === p.amount) continue;
+    out.push({ p, more, sug });
+  }
+  return out;
+}
+function savedByMonth(){
+  if(!S.start) return [];
+  const t = today(), res = [];
+  let [y, m] = pd(addDays(S.start.date, 1));
+  const [ty, tm] = pd(t);
+  while(y < ty || (y === ty && m < tm)){
+    const e = ds(y, m, dim(y, m)), prev = addDays(ds(y, m, 1), -1);
+    const before = prev < S.start.date ? S.start.amount : balance(prev);
+    res.push({ y, m, diff: balance(e) - before });
+    if(++m > 12){ m = 1; y++; }
+  }
+  return res;
+}
+function vF(){
+  const c = calc(), st = S.settings;
+  const coming = c.pool - Math.max(0, c.bal);
+  const gU = Math.min(c.pending, c.pool), fU = Math.min(c.RE, c.pool - gU), freeAfter = c.pool - gU - fU;
+  const sugs = potSuggestions(), hist = savedByMonth();
+  const daysTxt = c.mode === 'payday'
+    ? `Bis zum nächsten Geld-Tag sind es noch <b>${c.left} ${c.left === 1 ? 'Tag' : 'Tage'}</b>.`
+    : `Der Monat hat noch <b>${c.left} ${c.left === 1 ? 'Tag' : 'Tage'}</b>.`;
+  const foodTxt = st.buysFood ? ` Du brauchst noch <b>${money(c.RE)}</b> für Essen.` : ` Du kannst heute noch etwa <b>${money(c.dayMoney)}</b> ausgeben.`;
+  const potRow = p => {
+    const pct = p.monthly > 0 ? Math.min(100, p.spent / p.monthly * 100) : 0, over = p.rest < 0;
+    return `<div class="potrow">
+      <div class="ph">${potPic(p)}<div style="flex:1;min-width:0"><b>Geld für ${esc(p.name)}</b>
+        <small>${p.food ? `${money(p.amount)} am Tag · ` : ''}${money(p.monthly)} im Monat</small></div>
+        <div class="pr ${over ? 'neg' : ''}">${over ? `${money(-p.rest)}<small>zu viel</small>` : `${money(p.rest)}<small>übrig</small>`}</div></div>
+      <div class="hbar"><i class="${over ? 'over' : ''}" style="width:${over ? 100 : pct}%"></i></div>
+      <small class="muted">ausgegeben: ${money(p.spent)}</small></div>`;
+  };
+  return `<div class="screen withbar">
+    <div class="qhead"><h1>${esc(c.title)}</h1>${speakBtn((daysTxt + foodTxt).replace(/<[^>]+>/g, ''))}</div>
+    ${warnHtml(c)}
+    <div class="card" style="font-size:1.2em;line-height:1.5">${daysTxt}${foodTxt}</div>
+    <div class="overview">
+      <div class="barcol" style="width:124px">${moneyBar(c, 340).replace('class="bar"', 'class="bar" style="width:110px;height:340px"')}</div>
+      <div class="legend">
+        <div class="total">Mein Geld<b class="${c.bal < 0 ? 'neg' : ''}">${money(c.bal)}</b></div>
+        ${coming > 0 ? `<div class="lg"><i style="border:3px dashed #b9f5c4;background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 4px,transparent 4px 8px)"></i><span><b>${money(coming)}</b>kommen noch ${esc(c.until)}</span></div>` : ''}
+        ${c.pending > 0 ? `<div class="lg"><i style="background:var(--grey)"></i><span><b>${money(c.pending)}</b>feste Kosten, die noch abgehen</span></div>` : ''}
+        ${st.buysFood && c.RE > 0 ? `<div class="lg"><i style="background:var(--food)"></i><span><b>${money(c.RE)}</b>für Essen ${esc(c.until)}</span></div>` : ''}
+        <div class="lg"><i style="background:var(--green2)"></i><span><b>${money(Math.max(0, freeAfter))}</b>frei</span></div>
+        ${c.pending + c.RE > c.pool ? `<div class="lg"><i style="border:3px dashed var(--red)"></i><span><b class="neg">${money(c.pending + c.RE - c.pool)}</b>fehlt</span></div>` : ''}
+      </div>
+    </div>
+    ${sugs.map(s => `<div class="card sug">${smiley(48)}<div style="flex:1">
+        <p>Für <b>${esc(s.p.name)}</b> hast du in den letzten 3 Monaten <b>${s.more ? 'mehr' : 'weniger'}</b> gebraucht.<br>
+        Willst du jetzt <b>${money(s.sug)} ${s.p.food ? 'am Tag' : 'im Monat'}</b> dafür einplanen?</p>
+        <div class="row" style="margin-top:10px"><button class="btn" data-a="sugNo" data-v="${s.p.id}">Nein</button><button class="btn primary" data-a="sugYes" data-v="${s.p.id}:${s.sug}">Ja</button></div></div></div>`).join('')}
+    ${c.pots.length ? `<div class="card"><h2>🫙 Geld-Töpfe im ${MON[c.m - 1]}</h2><div class="list">${c.pots.map(potRow).join('')}</div></div>` : ''}
+    ${c.saved > 0 || hist.length ? `<div class="card"><div class="hint" style="border:0;padding:0;margin-bottom:10px">${smiley(44)}<span>${c.saved > 0 ? `Du hast schon <b>${money(c.saved)}</b> gespart. Super! 👍` : 'So viel ist in den letzten Monaten übrig geblieben:'}</span></div>
+      ${hist.slice(-6).reverse().map(h => `<div class="kv"><span>${MON[h.m - 1]} ${h.y}</span><b class="${h.diff < 0 ? 'neg' : ''}">${h.diff > 0 ? '＋' : ''}${money(h.diff)}</b></div>`).join('')}
+      ${hist.length ? `<p class="muted" style="margin-top:8px;font-size:.85em">＋ heißt: so viel ist in dem Monat übrig geblieben. − heißt: du hast mehr ausgegeben, als reinkam.</p>` : ''}</div>` : ''}
+  </div>${bar()}`;
+}
+
+/* ---------- Seite C: Kalender ---------- */
+function vC(){
+  const c = calc(), t = c.t;
+  const [y, m] = V.calMonth.split('-').map(Number), n = dim(y, m);
+  const mS = ds(y, m, 1), mE = ds(y, m, n);
+  const list = S.start ? txs(maxS(mS, S.start.date), mE) : [];
+  const byDay = {}; for(const x of list) (byDay[x.date] = byDay[x.date] || []).push(x);
+  const pm = m === 1 ? [y - 1, 12] : [y, m - 1], nm = m === 12 ? [y + 1, 1] : [y, m + 1];
+  const before = S.start && mE < S.start.date;
+  let days = '';
+  for(let d = 1; d <= n; d++){
+    const s = ds(y, m, d), items = byDay[s] || [], isToday = s === t, future = s > t;
+    days += `<div class="day ${isToday ? 'today' : ''} ${items.length ? '' : 'empty'}" ${isToday ? 'id="todayRow"' : ''}>
+      <div class="dl"><b>${d}</b><small>${WD_SHORT[toDate(s).getDay()]}</small>${isToday ? '<em>Heute</em>' : ''}</div>
+      <div class="dtx">${items.map(x => {
+        const p = x.potId ? S.pots.find(q => q.id === x.potId) : null;
+        const label = `${p && !p.photo ? p.emoji + ' ' : ''}${esc(x.text)}`;
+        return `<button class="ci ${x.type}-${x.kind} ${future ? 'later' : ''}" data-a="cItem" data-v="${x.kind === 'once' ? x.id : 'rec:' + x.recId}">
+          <span class="amt">${x.type === 'in' ? '＋' : '−'} ${money(x.amount)}</span><span class="lbl">${label}${future ? ' · kommt noch' : ''}</span></button>`;
+      }).join('')}</div></div>`;
+  }
+  const ins = sum(list.filter(x => x.type === 'in' && x.date <= t)), outs = sum(list.filter(x => x.type === 'out' && x.date <= t));
+  return `<div class="screen withbar">
+    <div class="qhead"><h1>📅 ${MON[m - 1]} ${y}</h1>${speakBtn(`${MON[m - 1]} ${y}`)}</div>
+    ${V.calMonth === t.slice(0, 7) ? warnHtml(c) : ''}
+    <div class="clegend"><span class="ci out-once">einmal ausgegeben</span><span class="ci in-once">einmal bekommen</span><span class="ci out-rec">feste Kosten</span><span class="ci in-rec">regelmäßiges Geld</span></div>
+    ${before ? `<p class="note">In diesem Monat hast du die App noch nicht benutzt.</p>` : ''}
+    <div class="days">${days}</div>
+    ${!before && list.length ? `<div class="card"><div class="kv"><span>Bekommen im ${MON[m - 1]}${mE > t ? ' (bis heute)' : ''}</span><b>${money(ins)}</b></div><div class="kv"><span>Ausgegeben im ${MON[m - 1]}${mE > t ? ' (bis heute)' : ''}</span><b>${money(outs)}</b></div></div>` : ''}
+    <div class="footer stick"><button class="btn" data-a="calMonth" data-v="-1">◀ ${MON[pm[1] - 1]}</button><button class="btn" data-a="calMonth" data-v="1">${MON[nm[1] - 1]} ▶</button></div>
+  </div>${bar()}`;
+}
+function vCDetail(){
+  const b = S.bookings.find(x => x.id === V.cDetail);
+  if(!b){ V.cDetail = null; return vC(); }
+  const p = b.potId ? S.pots.find(q => q.id === b.potId) : null;
+  const what = p ? `${p.photo ? '' : p.emoji + ' '}${esc(p.name)}${b.text && b.text !== p.name ? ` (${esc(b.text)})` : ''}` : esc(b.text);
+  const [, m, d] = pd(b.date);
+  const sent = b.type === 'out'
+    ? `Am <b>${d}. ${MON[m - 1]}</b> hast du <b>${money(b.amount)}</b> für <b>${what}</b> ausgegeben.`
+    : `Am <b>${d}. ${MON[m - 1]}</b> hast du <b>${money(b.amount)}</b> für <b>${what}</b> bekommen.`;
+  const old = b.date < addDays(today(), -1);
+  return `<div class="screen withbar">
+    <div class="qhead"><h1>${b.type === 'out' ? '− Ausgabe' : '＋ Einnahme'}</h1>${speakBtn(sent.replace(/<[^>]+>/g, ''))}</div>
+    <div class="sentence ${b.type === 'out' ? 'out' : ''}">${sent}</div>
+    ${old && hasPin() ? `<p class="muted">🔒 Diese Buchung ist älter als gestern. Zum Ändern oder Löschen brauchst du die PIN.</p>` : ''}
+    <div class="list">
+      <button class="btn big" data-a="cEdit">✏️ Ändern</button>
+      <button class="btn big danger" data-a="cDelete">🗑️ Löschen</button>
+    </div>
+    <div class="footer"><button class="btn" data-a="cBack">◀ Zurück zum Kalender</button></div>
+  </div>${bar()}`;
+}
+
+function vTx(){
+  const X = V.tx, c = calc(), out = X.type === 'out';
+  const title = out ? 'Geld ausgegeben' : 'Geld bekommen';
+  const err = V.err ? `<p class="err">${esc(V.err)}</p>` : '';
+  const head = (q) => `<div class="qhead"><h1 class="${out ? 'hd-out' : 'hd-in'}">${out ? '−' : '＋'} ${title}</h1>${speakBtn(title + '. ' + q)}</div>`;
+  if(X.step === 0){
+    const q = out ? 'Wofür hast du Geld ausgegeben?' : 'Wofür hast du Geld bekommen?';
+    let body = '';
+    if(out){
+      body = `<div class="pottiles">${c.pots.map(p => `<button class="pt ${X.potId === p.id ? 'sel' : ''}" data-a="txPot" data-v="${p.id}">
+          ${potPic(p)}<b>${esc(p.name)}</b>${p.food ? '' : `<small class="${p.rest < 0 ? 'neg' : ''}">${p.rest < 0 ? `${money(-p.rest)} zu viel` : `noch ${money(p.rest)}`}</small>`}</button>`).join('')}
+        <button class="pt ${X.potId === 'other' ? 'sel' : ''}" data-a="txPot" data-v="other"><div class="mini">✏️</div><b>Etwas anderes</b></button></div>`;
+      if(X.potId) body += X.potId === 'other'
+        ? `<input type="text" data-in="txText" value="${esc(X.text)}" placeholder="Wofür? z. B. Geschenk" maxlength="30" autofocus>`
+        : `<input type="text" data-in="txText" value="${esc(X.text)}" placeholder="Was genau? (musst du nicht)" maxlength="30">`;
+    } else {
+      body = `<input type="text" data-in="txText" value="${esc(X.text)}" placeholder="z. B. Geburtstag" maxlength="30">
+        <div class="chips">${IN_SUGGEST.map(t => `<button class="chip" data-a="txChip" data-v="${t}">${t}</button>`).join('')}</div>`;
+    }
+    return `<div class="screen withbar">${head(q)}${txTop(c)}
+      <h2 style="margin:0">${q}</h2>${body}${err}
+      <div class="footer stick"><button class="btn" data-a="txCancel">✕ Abbrechen</button><button class="btn primary" data-a="txNext">Weiter ▶</button></div>
+    </div>${bar()}`;
+  }
+  if(X.step === 1){
+    const q = out ? 'Wie viel hast du ausgegeben?' : 'Wie viel hast du bekommen?';
+    return `<div class="screen withbar tx">${head(q)}
+      <p class="muted">${dayLabel(X.date).replace('<small>', ', ').replace('</small>', '')} · für ${txWhat(X)}</p>
+      <h2 style="margin:0">${q}</h2>
+      ${numpad(false)}${err}
+      <div class="footer stick"><button class="btn" data-a="txBack">◀ Zurück</button><button class="btn primary big" data-a="txNext">✓ Fertig</button></div>
+    </div>${bar()}`;
+  }
+  const [,m,d] = pd(X.date);
+  const sentence = out
+    ? `Du hast am <b>${d}. ${MON[m - 1]}</b> <b>${money(X.amount)}</b> für <b>${txWhat(X)}</b> ausgegeben.`
+    : `Du hast am <b>${d}. ${MON[m - 1]}</b> <b>${money(X.amount)}</b> für <b>${txWhat(X)}</b> bekommen.`;
+  const plain = sentence.replace(/<[^>]+>/g, '');
+  return `<div class="screen withbar"><div class="qhead"><h1>Stimmt das?</h1>${speakBtn(plain + ' Stimmt das?')}</div>
+    <div class="sentence ${out ? 'out' : ''}">${sentence}</div>
+    <div class="footer" style="flex-direction:column">
+      <button class="btn primary big" data-a="txSave">✓ Ja, speichern</button>
+      <button class="btn" data-a="txEdit">Nein, ändern</button></div>
+  </div>${bar()}`;
+}
+
+/* =========================================================
+   SEITE G: Einstellungen
+   ========================================================= */
+/* PIN + Notfall-Code: nur eine Hürde gegen Versehen, keine echte Sicherheit */
+function hashStr(str){ let h = 0x811c9dc5; for(const ch of 'mein-geld:' + str){ h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); }
+function newCode(){
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c = '';
+  const r = new Uint32Array(8); try { crypto.getRandomValues(r); } catch(e){ for(let i = 0; i < 8; i++) r[i] = Math.random() * 1e9; }
+  for(let i = 0; i < 8; i++){ c += A[r[i] % A.length]; if(i === 3) c += '-'; }
+  return c;
+}
+const hasPin = () => !!(S.security && S.security.pinHash);
+function pinOk(p){ return hasPin() && hashStr(p) === S.security.pinHash; }
+/* Wichtige Aktionen brauchen die PIN noch einmal (falls eine PIN festgelegt ist) */
+let pinThen = null;
+function requirePin(why, fn){
+  if(!hasPin()){ fn(); return; }
+  pinThen = fn; V.pinWhy = why; V.gsub = 'pinCheck'; V.pinBuf = ''; V.err = '';
+}
+const FS = { normal: '19px', big: '22px', huge: '25px' };
+
+function pinScreen(title, sub, extra){
+  const dots = Array.from({length: 4}, (_, i) => `<i style="width:22px;height:22px" class="${i < V.pinBuf.length ? 'on' : ''}"></i>`).join('');
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','del'];
+  return `<div class="screen withbar">
+    <div class="qhead"><h1>🔒 ${esc(title)}</h1>${speakBtn(title + (sub ? '. ' + sub : ''))}</div>
+    ${sub ? `<p class="muted">${esc(sub)}</p>` : ''}
+    <div class="dots" style="gap:16px;padding:14px 0">${dots}</div>
+    ${V.err ? `<p class="err" style="text-align:center">${esc(V.err)}</p>` : ''}
+    <div class="numpad">${keys.map(k => k === '' ? '<span></span>' : `<button class="key" data-a="pinKey" data-v="${k}" aria-label="${k === 'del' ? 'Löschen' : k}">${k === 'del' ? '⌫' : k}</button>`).join('')}</div>
+    ${extra || ''}
+  </div>${bar()}`;
+}
+
+function vG(){
+  if(V.ed) return vEditor();
+  const st = S.settings, g = V.gsub;
+  // gesperrt?
+  if(hasPin() && !V.unlocked && g !== 'forgot')
+    return pinScreen('Gib deine PIN ein', 'Die Einstellungen sind geschützt.',
+      `<button class="btn" data-a="gsub" data-v="forgot">PIN vergessen?</button>`);
+  if(g === 'forgot') return `<div class="screen withbar">
+      <div class="qhead"><h1>PIN vergessen?</h1>${speakBtn('PIN vergessen? Gib den Notfall-Code ein. Du hast ihn aufgeschrieben, oder dein Betreuer hat ihn.')}</div>
+      <p>Gib den <b>Notfall-Code</b> ein. Du hast ihn aufgeschrieben, oder dein Betreuer hat ihn.</p>
+      <input type="text" data-in="code" placeholder="z. B. AB12-CD34" maxlength="9" autocapitalize="characters" autocomplete="off" autofocus>
+      ${V.err ? `<p class="err">${esc(V.err)}</p>` : ''}
+      <div class="footer"><button class="btn" data-a="gsub" data-v="">◀ Zurück</button><button class="btn primary" data-a="checkCode">Weiter ▶</button></div>
+    </div>${bar()}`;
+  if(g === 'pinNew1') return pinScreen('Neue PIN', 'Denk dir 4 Zahlen aus.', `<button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button>`);
+  if(g === 'pinNew2') return pinScreen('PIN noch einmal', 'Gib die gleiche PIN noch einmal ein.', `<button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button>`);
+  if(g === 'pinCheck') return pinScreen('PIN eingeben', V.pinWhy, `<button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button>`);
+  if(g === 'code') return `<div class="screen withbar">
+      <div class="qhead"><h1>Dein Notfall-Code</h1>${speakBtn('Dein Notfall-Code. Damit kannst du eine neue PIN machen, wenn du deine PIN vergessen hast. Schreib dir diesen Code gut auf oder gib ihn deinem Betreuer!')}</div>
+      <p>Damit kannst du eine neue PIN machen, wenn du deine PIN vergessen hast.</p>
+      <div class="sentence" style="text-align:center;font-size:2.2em;letter-spacing:.08em;font-family:monospace"><b>${esc(V.newCode)}</b></div>
+      <div class="warn"><span class="ic">✍️</span><span>Schreib dir diesen Code gut auf oder gib ihn deinem Betreuer!<br>Merk dir auch deine PIN gut!</span></div>
+      <p class="muted">Der Code wird nur jetzt angezeigt.</p>
+      <div class="footer"><button class="btn primary big" data-a="codeDone">✓ Ich habe den Code aufgeschrieben</button></div>
+    </div>${bar()}`;
+  if(g === 'name') return `<div class="screen withbar">
+      <div class="qhead"><h1>Wie heißt du?</h1>${speakBtn('Wie heißt du?')}</div>
+      <input type="text" data-in="newName" value="${esc(V.newName)}" maxlength="30" autofocus>
+      ${V.err ? `<p class="err">${esc(V.err)}</p>` : ''}
+      <div class="footer"><button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button><button class="btn primary" data-a="saveName">✓ Speichern</button></div>
+    </div>${bar()}`;
+  if(g === 'corr'){
+    const c = calc();
+    return `<div class="screen withbar tx">
+      <div class="qhead"><h1>Wie viel Geld hast du wirklich?</h1>${speakBtn('Wie viel Geld hast du wirklich? Zähl alles zusammen: Geld im Portemonnaie und auf dem Konto.')}</div>
+      <p class="muted">Die App denkt: <b>${money(c.bal)}</b>. Zähl alles zusammen: Portemonnaie und Konto.</p>
+      <div class="row"><button class="btn ${!V.corrNeg ? 'sel' : ''}" data-a="corrNeg" data-v="0">Plus</button><button class="btn ${V.corrNeg ? 'sel' : ''}" data-a="corrNeg" data-v="1">Minus</button></div>
+      ${numpad(V.corrNeg)}
+      <div class="footer stick"><button class="btn" data-a="gsub" data-v="">✕ Abbrechen</button><button class="btn primary" data-a="corrNext">Weiter ▶</button></div>
+    </div>${bar()}`;
+  }
+  if(g === 'corr2'){
+    const c = calc(), diff = V.corrTo - c.bal;
+    return `<div class="screen withbar">
+      <div class="qhead"><h1>Stimmt das?</h1></div>
+      <div class="sentence">Die App denkt: <b>${money(c.bal)}</b>.<br>Du hast wirklich: <b>${money(V.corrTo)}</b>.<br><br>
+        Die App trägt eine Korrektur von <b>${diff > 0 ? '＋' : ''}${money(diff)}</b> ein.</div>
+      <div class="footer" style="flex-direction:column"><button class="btn primary big" data-a="corrSave">✓ Ja, korrigieren</button><button class="btn" data-a="gsub" data-v="corr">Nein, ändern</button></div>
+    </div>${bar()}`;
+  }
+  if(g === 'backup') return `<div class="screen withbar">
+      <div class="qhead"><h1>Daten sichern</h1>${speakBtn('Daten sichern. Am besten macht das dein Betreuer.')}</div>
+      <p class="muted">Am besten macht das dein Betreuer. So gehen keine Daten verloren, wenn das Handy kaputt geht.</p>
+      <div class="card"><h2>💾 Sichern</h2><div class="list">
+        <button class="btn" data-a="exportFile">Als Datei speichern</button>
+        <button class="btn" data-a="exportCopy">Als Text kopieren</button></div></div>
+      <div class="card"><h2>📂 Wiederherstellen</h2><div class="list">
+        <label class="btn">Datei öffnen<input type="file" accept=".json,application/json,text/plain" data-in="importFile" hidden></label>
+        <textarea data-in="importText" rows="3" placeholder="… oder kopierten Text hier einfügen" style="width:100%;font:inherit;font-size:.9em;padding:10px;border-radius:12px;border:2px solid var(--line);background:#0d0f12;color:var(--text)"></textarea>
+        <button class="btn" data-a="importText">Text wiederherstellen</button></div></div>
+      <div class="footer"><button class="btn" data-a="gsub" data-v="">◀ Zurück</button></div>
+    </div>${bar()}`;
+
+  // Hauptseite
+  const t = today();
+  const active = type => S.recurring.filter(r => r.type === type && (!r.validTo || r.validTo >= t));
+  const recList = type => {
+    const items = active(type);
+    return `<div class="list">${items.length ? items.map(r => `<button class="item ${type}-rec" style="text-align:left;color:var(--text);font:inherit;cursor:pointer;width:100%;border-top:0;border-right:0;border-bottom:0" data-a="recMenu" data-v="${r.id}">
+        <div class="t"><b>${esc(r.name)}</b>${money(r.amount)} · ${rhythmText(r)}</div><span>✏️</span></button>`).join('') : '<p class="muted">Noch nichts eingetragen.</p>'}
+      <button class="btn" data-a="gNewRec" data-v="${type}">＋ Neu</button></div>`;
+  };
+  // Geld-Töpfe: 4 pro Seite, blättern mit Pfeilen
+  const tiles = S.pots.map(p => `<button class="pt" data-a="potEdit" data-v="${p.id}">${potPic(p)}<b>${esc(p.name)}</b><small>${money(p.amount)} ${p.food ? 'am Tag' : 'im Monat'}</small></button>`);
+  if(S.pots.filter(p => !p.food).length < 5) tiles.push(`<button class="pt" data-a="gNewPot"><div class="mini">＋</div><b>Neuer Geld-Topf</b></button>`);
+  const pages = Math.ceil(tiles.length / 4); V.potPage = Math.min(V.potPage || 0, pages - 1);
+  const pageTiles = tiles.slice(V.potPage * 4, V.potPage * 4 + 4).join('');
+  const c = S.setupDone ? calc() : null;
+  const kv = (k, v, cls) => `<div class="kv"><span>${k}</span><b class="${cls || ''}">${v}</b></div>`;
+  const opt = (a, val, cur, label) => `<button class="btn ${cur === val ? 'sel' : ''}" data-a="${a}" data-v="${val}">${cur === val ? '✓ ' : ''}${label}</button>`;
+
+  return `<div class="screen withbar">
+    <h1>⚙️ Einstellungen</h1>
+    ${st.devMode
+      ? `<div class="datepick"><button class="btn small" data-a="shiftDay" data-v="-1" aria-label="Einen Tag zurück">◀</button><div>📅 ${fmtDate(t)}<span class="badge">Test</span></div><button class="btn small" data-a="shiftDay" data-v="1" aria-label="Einen Tag vor">▶</button></div>`
+      : `<p class="muted" style="text-align:center">📅 ${fmtDate(t)}</p>`}
+
+    <div class="card"><h2>👤 Dein Name</h2><div class="row" style="align-items:center"><b style="flex:1;font-size:1.2em">${esc(S.profile.name)}</b><button class="btn small" data-a="gName">Ändern</button></div></div>
+
+    <div class="card"><h2>＋ Regelmäßig Geld bekommen</h2>${recList('in')}</div>
+    <div class="card"><h2>− Regelmäßig bezahlen</h2>${recList('out')}</div>
+
+    <div class="card"><h2>🫙 Geld-Töpfe</h2>
+      <div class="pottiles" style="grid-template-columns:1fr 1fr">${pageTiles}</div>
+      ${pages > 1 ? `<div class="row" style="margin-top:10px;align-items:center"><button class="btn small" data-a="potPage" data-v="-1" ${V.potPage === 0 ? 'disabled' : ''} aria-label="Zurück blättern">◀</button><span style="flex:1;text-align:center" class="muted">Seite ${V.potPage + 1} von ${pages}</span><button class="btn small" data-a="potPage" data-v="1" ${V.potPage >= pages - 1 ? 'disabled' : ''} aria-label="Weiter blättern">▶</button></div>` : ''}
+    </div>
+
+    <div class="card"><h2>🧮 So rechnet die App</h2><div class="list">
+      <p class="muted">Bis wann muss dein Geld reichen?</p>
+      ${opt('setH', 'month', st.horizon, 'Bis zum Monatsende')}${opt('setH', 'payday', st.horizon, 'Bis zum nächsten Geld-Tag')}
+      <p class="muted" style="margin-top:6px">Kaufst du von dem Geld dein Essen?</p>
+      <div class="row">${opt('setBF', 'yes', st.buysFood ? 'yes' : 'no', 'Ja')}${opt('setBF', 'no', st.buysFood ? 'yes' : 'no', 'Nein')}</div>
+    </div></div>
+
+    <div class="card"><h2>👀 Anzeige</h2><div class="list">
+      <button class="btn ${st.readAloud ? 'sel' : ''}" data-a="toggle" data-v="readAloud">🔊 Vorlesen: ${st.readAloud ? 'AN' : 'AUS'}</button>
+      <p class="muted">Schriftgröße:</p>
+      <div class="row">${opt('setFS', 'normal', st.fontSize, 'A')}${opt('setFS', 'big', st.fontSize, '<span style="font-size:1.2em">A</span>')}${opt('setFS', 'huge', st.fontSize, '<span style="font-size:1.45em">A</span>')}</div>
+      <button class="btn ${st.showCents ? 'sel' : ''}" data-a="toggle" data-v="showCents">Cent anzeigen: ${st.showCents ? 'JA (12,50 €)' : 'NEIN (13 €)'}</button>
+    </div></div>
+
+    <div class="card"><h2>🔒 PIN</h2><div class="list">
+      <p class="muted">${hasPin() ? 'Die Einstellungen sind mit einer PIN geschützt.' : 'Mit einer PIN kann niemand aus Versehen etwas verstellen.'}</p>
+      ${hasPin()
+        ? `<button class="btn" data-a="pinStart">Neue PIN festlegen</button><button class="btn" data-a="pinRemove">PIN entfernen</button>`
+        : `<button class="btn primary" data-a="pinStart">PIN festlegen</button>`}
+    </div></div>
+
+    <div class="card"><h2>✏️ Mein Geld stimmt nicht</h2>
+      <p class="muted" style="margin-bottom:10px">Wenn du etwas vergessen hast, kannst du hier sagen, wie viel Geld du wirklich hast.</p>
+      <button class="btn" data-a="corrStart">Geld korrigieren</button></div>
+
+    <div class="card"><h2>💾 Daten</h2><div class="list">
+      <button class="btn" data-a="backupStart">Daten sichern / wiederherstellen</button>
+      <button class="btn danger" data-a="reset">Alles löschen und neu anfangen</button></div></div>
+
+    <div class="card"><h2>🧪 Entwickler-Test-Modus</h2><div class="list">
+      <button class="btn ${st.devMode ? 'sel' : ''}" data-a="toggle" data-v="devMode">Test-Modus: ${st.devMode ? 'AN' : 'AUS'}</button>
+      ${st.devMode ? `
+        <div class="row"><button class="btn small" data-a="shiftMonth" data-v="-1">◀◀ Monat</button><button class="btn small" data-a="shiftMonth" data-v="1">Monat ▶▶</button></div>
+        <input type="date" data-in="testDate" value="${t}">
+        <button class="btn small" data-a="realToday">Echtes Datum (heute)</button>
+        <button class="btn" data-a="example" data-v="month">Beispiel 1: Alex (Monat, kauft Essen)</button>
+        <button class="btn" data-a="example" data-v="pocket">Beispiel 2: Mia (20 € jede Woche, Essen bezahlt)</button>
+        <button class="btn" data-a="example" data-v="weekly">Beispiel 3: Ben (Jobcenter, Wochengeld vom Betreuer)</button>` : ''}
+    </div>
+    ${st.devMode && c ? `<div style="margin-top:14px"><h2>Rechen-Check</h2>
+      ${kv('Zeitraum', c.mode === 'payday' ? `${fmtDay(c.pStart)} bis ${fmtDay(c.E)}` : `${MON[c.m - 1]}`)}
+      ${kv('Mein Geld jetzt', money(c.bal), c.bal < 0 ? 'neg' : '')}
+      ${kv('Regelmäßige Einnahmen im Monat', money(c.monthIn))}
+      ${kv('Fixe Kosten im Monat', money(c.monthFix))}
+      ${kv('Regelmäßiges Geld, das noch kommt', money(c.pendingIn))}
+      ${kv('Fixe Kosten, die noch kommen', money(c.pending))}
+      ${kv('Frei verfügbar', money(c.free), c.free < 0 ? 'neg' : '')}
+      ${kv(`Noch ${c.left} Tage × ${money(c.perDay)} Essen`, money(c.RE))}
+      ${kv('Heute ausgeben (Geld-Tag)', money(c.dayMoney))}
+      ${kv('Gespart', money(c.saved))}
+    </div>` : ''}
+    </div>
+  </div>${bar()}`;
+}
+
+function importData(txt){
+  let data;
+  try { data = JSON.parse(txt); } catch(e){ toast('Das sind keine gültigen Daten'); return; }
+  if(!data || data.version !== 1 || !Array.isArray(data.bookings)){ toast('Das sind keine gültigen Daten'); return; }
+  ask('Daten wiederherstellen? Die jetzigen Daten werden dabei überschrieben.', 'Ja, wiederherstellen', () =>
+    requirePin('Zur Sicherheit: Gib deine PIN ein, um die Daten zu überschreiben.', () => {
+      S = data; S.settings = Object.assign(defaultSettings(), S.settings || {}); save(); V.gsub = null; V.unlocked = false; toast('Wiederhergestellt ✓');
+    }), true);
+}
+function storeSaveEditor(){
+  const E = V.ed, x = E.data, t = today();
+  if(E.kind === 'pot'){
+    if(E.editId){ const p = S.pots.find(p => p.id === E.editId); Object.assign(p, { name: x.name, emoji: x.emoji, photo: x.photo, amount: x.amount }); }
+    else S.pots.push({ id: uid(), name: x.name, emoji: x.emoji, photo: x.photo, amount: x.amount });
+  } else {
+    const r = { id: uid(), type: x.type, name: x.name, amount: x.amount, rhythm: x.rhythm, validFrom: t, validTo: null };
+    if(x.rhythm === 'week') r.weekday = x.weekday; else r.day = x.day;
+    if(x.rhythm === 'year') r.month = x.month;
+    if(E.editId){ const old = S.recurring.find(o => o.id === E.editId); if(old) old.validTo = addDays(t, -1); }
+    S.recurring.push(r);
+  }
+  save();
+}
+function doReset(){
+  const dev = S.settings.devMode, td = S.settings.testDate;
+  S = blank(); S.settings.devMode = dev; S.settings.testDate = td; save();
+  V.view = 'A'; V.gsub = null; V.unlocked = false;
+}
+function pinDigit(){
+  const p = V.pinBuf; V.pinBuf = ''; V.err = '';
+  if(!V.unlocked && hasPin() && !V.gsub){
+    if(pinOk(p)){ V.unlocked = true; } else V.err = 'Die PIN stimmt nicht. Versuch es noch einmal.';
+    return;
+  }
+  if(V.gsub === 'pinNew1'){ V.pinFirst = p; V.gsub = 'pinNew2'; return; }
+  if(V.gsub === 'pinNew2'){
+    if(p !== V.pinFirst){ V.gsub = 'pinNew1'; V.err = 'Die PINs waren nicht gleich. Fang noch einmal an.'; return; }
+    V.newCode = newCode();
+    S.security = { pinHash: hashStr(p), codeHash: hashStr(V.newCode.replace('-', '')) };
+    save(); V.unlocked = true; V.gsub = 'code'; return;
+  }
+  if(V.gsub === 'pinCheck'){
+    if(pinOk(p)){ const f = pinThen; pinThen = null; V.gsub = null; if(f) f(); }
+    else V.err = 'Die PIN stimmt nicht. Versuch es noch einmal.';
+  }
+}
+
+/* ---------- Beispiel-Daten ---------- */
+function loadExample(kind){
+  const keep = S.settings;
+  S = blank(); S.settings = keep; S.setupDone = true;
+  const b = (date, type, amount, text, potId) => ({ id: uid(), date, type, amount, text, potId: potId || null });
+  if(kind === 'weekly'){
+    S.profile.name = 'Ben';
+    S.settings.horizon = 'month'; S.settings.buysFood = true;
+    S.start = { amount: 5000, date: '2026-10-31' };
+    S.recurring = [
+      { id: 'r1', type: 'in',  name: 'Geld vom Jobcenter', amount: 56300, rhythm: 'month', day: 1, validFrom: null, validTo: null },
+      { id: 'r2', type: 'out', name: 'Geld an Betreuer', amount: 20000, rhythm: 'month', day: 1, validFrom: null, validTo: null },
+      { id: 'r3', type: 'in',  name: 'Wochengeld vom Betreuer', amount: 5000, rhythm: 'week', weekday: 1, validFrom: null, validTo: null },
+      { id: 'r4', type: 'out', name: 'Strom', amount: 4000, rhythm: 'month', day: 5, validFrom: null, validTo: null },
+      { id: 'r5', type: 'out', name: 'Handy', amount: 1500, rhythm: 'month', day: 10, validFrom: null, validTo: null }
+    ];
+    S.pots = [{ id: 'food', food: true, name: 'Essen', emoji: '🍎', photo: null, amount: 600 },
+              { id: 'k', name: 'Kleidung', emoji: '👕', photo: null, amount: 3000 }];
+    S.bookings = [ b('2026-11-03','out',3500,'Einkauf','food'), b('2026-11-07','out',2800,'Einkauf','food'),
+                   b('2026-11-10','out',2400,'Einkauf','food'), b('2026-11-11','out',1200,'Kino') ];
+  } else if(kind === 'pocket'){
+    S.profile.name = 'Mia';
+    S.settings.horizon = 'payday'; S.settings.buysFood = false;
+    S.start = { amount: 1200, date: '2026-11-02' };
+    S.recurring = [{ id: 'r1', type: 'in', name: 'Taschengeld', amount: 2000, rhythm: 'week', weekday: 1, validFrom: null, validTo: null }];
+    S.pots = [{ id: 'food', food: true, name: 'Essen', emoji: '🍎', photo: null, amount: 0 }];
+    S.bookings = [ b('2026-11-03','out',250,'Schokolade'), b('2026-11-05','out',180,'Cola'), b('2026-11-10','out',300,'Kaffee'), b('2026-11-11','out',450,'Zeitschrift') ];
+  } else {
+    S.profile.name = 'Alex';
+    S.settings.horizon = 'month'; S.settings.buysFood = true;
+    S.start = { amount: 30000, date: '2026-07-31' };
+    S.recurring = [
+      { id: 'r1', type: 'in',  name: 'Geld vom Jobcenter', amount: 45000, rhythm: 'month', day: 1, validFrom: null, validTo: null },
+      { id: 'r2', type: 'in',  name: 'Taschengeld', amount: 2500, rhythm: 'week', weekday: 5, validFrom: null, validTo: null },
+      { id: 'r3', type: 'out', name: 'Strom', amount: 4500, rhythm: 'month', day: 3, validFrom: null, validTo: null },
+      { id: 'r4', type: 'out', name: 'Handy', amount: 1500, rhythm: 'month', day: 15, validFrom: null, validTo: null },
+      { id: 'r5', type: 'out', name: 'Versicherung', amount: 6000, rhythm: 'year', month: 12, day: 1, validFrom: null, validTo: null }
+    ];
+    S.pots = [
+      { id: 'food', food: true, name: 'Essen', emoji: '🍎', photo: null, amount: 800 },
+      { id: 'k', name: 'Kleidung', emoji: '👕', photo: null, amount: 4000 },
+      { id: 'f', name: 'Freizeit', emoji: '🎮', photo: null, amount: 3000 },
+      { id: 'a', name: 'Alkohol & Zigaretten', emoji: '🚬', photo: null, amount: 2500 }
+    ];
+    S.bookings = [
+      b('2026-08-04','out',5200,'Jacke','k'), b('2026-08-09','out',500,'Eis','f'), b('2026-08-06','out',6100,'Einkauf','food'),
+      b('2026-08-15','out',6400,'Einkauf','food'), b('2026-08-22','out',5900,'Einkauf','food'), b('2026-08-29','out',5600,'Einkauf','food'), b('2026-08-20','out',2200,'Zigaretten','a'),
+      b('2026-09-05','out',5800,'Hose','k'), b('2026-09-12','out',800,'Kino','f'), b('2026-09-03','out',6300,'Einkauf','food'),
+      b('2026-09-10','out',5700,'Einkauf','food'), b('2026-09-17','out',6000,'Einkauf','food'), b('2026-09-24','out',5800,'Einkauf','food'), b('2026-09-19','out',2400,'Zigaretten','a'),
+      b('2026-10-02','out',2350,'Einkauf','food'), b('2026-10-05','out',1890,'Einkauf','food'),
+      b('2026-10-07','out',5500,'Pullover','k'),   b('2026-10-10','out',1000,'Kino','f'),
+      b('2026-10-12','in',2000,'Geburtstag'),      b('2026-10-14','out',2600,'Einkauf','food'),
+      b('2026-10-18','out',900,'Zigaretten','a'),  b('2026-10-20','out',2100,'Einkauf','food'),
+      b('2026-10-25','out',1400,'Bier','a'),       b('2026-10-28','out',2400,'Einkauf','food'),
+      b('2026-11-02','out',2600,'Einkauf','food'), b('2026-11-04','out',1800,'Zigaretten','a'),
+      b('2026-11-06','out',2200,'Einkauf','food'), b('2026-11-08','out',4500,'Schuhe','k'),
+      b('2026-11-10','out',2900,'Einkauf','food')
+    ];
+  }
+  save();
+}
+
+/* =========================================================
+   AKTIONEN
+   ========================================================= */
+function finishSetup(){
+  const t = today();
+  S.profile.name = D.name.trim();
+  S.start = { amount: D.start, date: t };
+  // validFrom bleibt leer: Der Monatsplan zeigt den ganzen Monat.
+  // Gebucht wird trotzdem erst ab dem Tag nach dem Start (siehe txs).
+  S.recurring = D.rec.map(r => ({ ...r, validFrom: null, validTo: null }));
+  S.settings.horizon = D.horizon;
+  S.settings.buysFood = D.buysFood;
+  S.pots = [{ id: 'food', food: true, name: 'Essen', emoji: '🍎', photo: null, amount: D.buysFood ? D.food : 0 }, ...D.pots];
+  S.bookings = [];
+  S.setupDone = true;
+  save();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
+  toast('Gespeichert ✓');
+  V.view = 'hint'; render();
+}
+
+function act(a, v){
+  switch(a){
+    case 'startTap':
+      if(!S.setupDone){ D = newDraft(); V.view = 'O'; V.ed = null; enterStep(0); }
+      else { V.view = 'B'; render(); }
+      return;
+    case 'go': V.view = v; V.ed = null; V.gsub = null; V.err = ''; V.pinBuf = ''; if(v !== 'G') V.unlocked = false; render(); window.scrollTo(0, 0); return;
+    case 'gsub': V.gsub = v || null; V.err = ''; V.pinBuf = ''; render(); return window.scrollTo(0, 0);
+    case 'pinKey':
+      if(v === 'del') V.pinBuf = V.pinBuf.slice(0, -1);
+      else if(V.pinBuf.length < 4){ V.pinBuf += v; if(V.pinBuf.length === 4){ render(); return setTimeout(() => { pinDigit(); render(); }, 180); } }
+      return render();
+    case 'checkCode': {
+      const inp = app.querySelector('[data-in=code]'); const code = (inp ? inp.value : '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if(S.security && hashStr(code) === S.security.codeHash){ S.security = null; save(); V.unlocked = true; V.gsub = 'pinNew1'; toast('Code stimmt ✓'); }
+      else V.err = 'Der Code stimmt nicht. Schau noch einmal genau hin.';
+      return render();
+    }
+    case 'codeDone': V.gsub = null; V.newCode = null; toast('PIN gespeichert ✓'); return render();
+    case 'pinStart': requirePin('Zur Sicherheit: Gib deine jetzige PIN ein.', () => { V.gsub = 'pinNew1'; V.pinBuf = ''; V.err = ''; }); return render();
+    case 'pinRemove': return ask('Willst du die PIN wirklich entfernen? Dann kann jeder die Einstellungen ändern.', 'Ja, entfernen', () =>
+      requirePin('Zur Sicherheit: Gib deine PIN ein, um sie zu entfernen.', () => { S.security = null; save(); toast('PIN entfernt'); }), true);
+    case 'gName': V.newName = S.profile.name; V.gsub = 'name'; V.err = ''; return render();
+    case 'saveName': if(!V.newName.trim()){ V.err = 'Bitte schreib deinen Namen.'; return render(); } S.profile.name = V.newName.trim(); save(); V.gsub = null; toast('Gespeichert ✓'); return render();
+    case 'gNewRec': V.ed = { kind: v, target: 'store', sub: 0, data: { type: v, name: '', amount: 0, rhythm: 'month', day: null, weekday: null, month: null } }; V.err = ''; render(); return window.scrollTo(0, 0);
+    case 'recMenu': {
+      const r = S.recurring.find(x => x.id === v);
+      return dialog(`${r.name}: ${money(r.amount)}, ${rhythmText(r)}`, [
+        { label: '✏️ Ändern', cls: 'primary', fn: () => { V.ed = { kind: r.type, target: 'store', editId: r.id, sub: 0, data: { ...r } }; V.num = centsToNum(r.amount); } },
+        { label: '🗑️ Löschen', cls: 'danger', fn: () => setTimeout(() => ask(`Willst du „${r.name}“ wirklich löschen? Das gilt ab heute.`, 'Ja, löschen', () => { r.validTo = addDays(today(), -1); save(); toast('Gelöscht'); }, true)) },
+        { label: 'Abbrechen' }
+      ]);
+    }
+    case 'gNewPot': V.ed = { kind: 'pot', target: 'store', sub: 0, data: { name: '', emoji: '👕', photo: null, amount: 0 } }; V.err = ''; render(); return window.scrollTo(0, 0);
+    case 'potEdit': { const p = S.pots.find(x => x.id === v); V.ed = { kind: 'pot', target: 'store', editId: p.id, sub: 0, data: { ...p } }; V.err = ''; render(); return window.scrollTo(0, 0); }
+    case 'potDelete': { const id = V.ed.editId, p = S.pots.find(x => x.id === id);
+      return ask(`Willst du den Geld-Topf „${p.name}“ wirklich löschen?`, 'Ja, löschen', () => { S.pots = S.pots.filter(x => x.id !== id); save(); V.ed = null; toast('Gelöscht'); }, true); }
+    case 'potPage': V.potPage = (V.potPage || 0) + (+v); return render();
+    case 'setH': S.settings.horizon = v; save(); return render();
+    case 'setBF': S.settings.buysFood = v === 'yes'; save(); return render();
+    case 'setFS': S.settings.fontSize = v; save(); return render();
+    case 'backupStart': requirePin('Zur Sicherheit: Gib deine PIN ein, um die Daten zu sichern.', () => { V.gsub = 'backup'; V.err = ''; }); render(); return window.scrollTo(0, 0);
+    case 'corrStart': requirePin('Zur Sicherheit: Gib deine PIN ein, um dein Geld zu korrigieren.', () => { V.gsub = 'corr'; V.num = ''; V.corrNeg = false; V.err = ''; }); return render();
+    case 'corrNeg': V.corrNeg = v === '1'; return render();
+    case 'corrNext': V.corrTo = numToCents(V.num) * (V.corrNeg ? -1 : 1); V.gsub = 'corr2'; return render();
+    case 'corrSave': {
+      const diff = V.corrTo - balance(today());
+      if(diff) S.bookings.push({ id: uid(), type: diff > 0 ? 'in' : 'out', date: today(), amount: Math.abs(diff), text: 'Korrektur', potId: null, corr: true });
+      save(); V.gsub = null; toast('Korrigiert ✓'); return render();
+    }
+    case 'exportFile': {
+      let framed = true; try { framed = window.self !== window.top; } catch(e){}
+      if(framed){ toast('Geht erst in der fertigen App'); return; }
+      try {
+        const blob = new Blob([JSON.stringify(S)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mein-geld-${today()}.json`;
+        document.body.appendChild(a); a.click(); a.remove();
+        toast('Datei wird gespeichert');
+      } catch(e){ toast('Das geht hier nicht. Nimm „Als Text kopieren“.'); }
+      return;
+    }
+    case 'exportCopy':
+      try { navigator.clipboard.writeText(JSON.stringify(S)).then(() => toast('Kopiert ✓'), () => toast('Kopieren geht hier nicht')); } catch(e){ toast('Kopieren geht hier nicht'); }
+      return;
+    case 'importText': { const ta = app.querySelector('[data-in=importText]'); return importData(ta ? ta.value : ''); }
+    case 'speak': speak(v); return;
+    case 'warn': case 'toF': V.view = 'F'; render(); return window.scrollTo(0, 0);
+    case 'sugNo': S.dismissed = S.dismissed || {}; S.dismissed[v] = today().slice(0, 7); save(); return render();
+    case 'sugYes': { const [id, amt] = v.split(':'); const p = S.pots.find(x => x.id === id);
+      requirePin('Zur Sicherheit: Gib deine PIN ein, um den Geld-Topf zu ändern.', () => { p.amount = +amt; save(); toast('Geändert ✓'); });
+      return render(); }
+    case 'toC': V.calMonth = today().slice(0, 7); V.cDetail = null; V.view = 'C'; render();
+      setTimeout(() => { const r = document.getElementById('todayRow'); if(r) r.scrollIntoView({ block: 'center' }); else window.scrollTo(0, 0); }, 30); return;
+    case 'calMonth': {
+      let [y, m] = V.calMonth.split('-').map(Number); m += +v; if(m < 1){ m = 12; y--; } if(m > 12){ m = 1; y++; }
+      V.calMonth = `${y}-${pad(m)}`; render(); return window.scrollTo(0, 0);
+    }
+    case 'cItem':
+      if(v.startsWith('rec:')) return dialog('Das ist eine regelmäßige Zahlung. Die änderst du in den Einstellungen.', [{ label: '⚙️ Zu den Einstellungen', cls: 'primary', fn: () => { V.view = 'G'; } }, { label: 'OK' }]);
+      V.cDetail = v; render(); return window.scrollTo(0, 0);
+    case 'cBack': V.cDetail = null; render(); { const r = document.getElementById('todayRow'); if(r) r.scrollIntoView({ block: 'center' }); } return;
+    case 'cEdit': case 'cDelete': {
+      const b = S.bookings.find(x => x.id === V.cDetail); if(!b) return;
+      const old = b.date < addDays(today(), -1);
+      const doIt = a === 'cEdit'
+        ? () => {
+            const p = b.potId ? S.pots.find(q => q.id === b.potId) : null;
+            V.tx = { type: b.type, step: 0, date: b.date, editId: b.id, back: 'C',
+                     potId: b.type === 'out' ? (p ? p.id : 'other') : null,
+                     text: p && b.text === p.name ? '' : b.text, amount: b.amount };
+            V.view = b.type === 'out' ? 'D' : 'E'; V.err = '';
+          }
+        : () => ask('Willst du diese Buchung wirklich löschen?', 'Ja, löschen', () => { S.bookings = S.bookings.filter(x => x.id !== b.id); save(); V.cDetail = null; toast('Gelöscht'); }, true);
+      if(old) requirePin('Diese Buchung ist älter als gestern. Gib die PIN ein.', doIt); else doIt();
+      render(); return window.scrollTo(0, 0);
+    }
+    case 'txCancel': { const back = V.tx && V.tx.back; V.tx = null; V.err = ''; V.view = back || 'B'; render(); return window.scrollTo(0, 0); }
+    case 'toD': V.tx = newTx('out'); V.err = ''; V.view = 'D'; render(); return window.scrollTo(0, 0);
+    case 'toE': V.tx = newTx('in'); V.err = ''; V.view = 'E'; render(); return window.scrollTo(0, 0);
+    case 'txDay': {
+      const nd = addDays(V.tx.date, +v), minD = S.start ? S.start.date : nd;
+      if(nd <= today() && nd >= minD) V.tx.date = nd; return render();
+    }
+    case 'txPot': V.tx.potId = v; V.err = ''; return render();
+    case 'txChip': V.tx.text = v; V.err = ''; return render();
+    case 'txNext': {
+      const X = V.tx; V.err = '';
+      if(X.step === 0){
+        if(X.type === 'out' && !X.potId){ V.err = 'Bitte tippe an, wofür.'; return render(); }
+        if((X.type === 'in' || X.potId === 'other') && !X.text.trim()){ V.err = 'Bitte schreib, wofür.'; return render(); }
+        X.text = X.text.trim(); V.num = centsToNum(X.amount);
+      } else if(X.step === 1){
+        X.amount = numToCents(V.num);
+        if(!X.amount){ V.err = 'Bitte gib einen Betrag ein.'; return render(); }
+      }
+      X.step++; render(); return window.scrollTo(0, 0);
+    }
+    case 'txBack': V.tx.amount = numToCents(V.num); V.tx.step = 0; V.err = ''; return render();
+    case 'txEdit': V.tx.step = 0; V.err = ''; render(); return window.scrollTo(0, 0);
+    case 'txSave': {
+      const X = V.tx;
+      const rec = { id: X.editId || uid(), type: X.type, date: X.date, amount: X.amount,
+        text: X.type === 'out' && X.potId !== 'other' ? (X.text || potName(X.potId).name) : X.text,
+        potId: X.type === 'out' && X.potId !== 'other' ? X.potId : null };
+      if(X.editId){ const i = S.bookings.findIndex(x => x.id === X.editId); if(i >= 0) S.bookings[i] = rec; else S.bookings.push(rec); }
+      else S.bookings.push(rec);
+      save(); V.view = X.back || 'B'; if(X.back === 'C'){ V.cDetail = null; V.calMonth = X.date.slice(0, 7); } V.tx = null;
+      toast('Gespeichert ✓'); render(); return window.scrollTo(0, 0);
+    }
+
+    // Ersteinrichtung
+    case 'onext': {
+      leaveStep();
+      const s = curStep();
+      if(s === 'name' && !D.name.trim()){ V.err = 'Bitte schreib deinen Namen.'; return render(); }
+      if(s === 'minus' && D.neg === null){ V.err = 'Bitte tippe auf eine Antwort.'; return render(); }
+      if(s === 'horizon' && !D.horizon){ V.err = 'Bitte tippe auf eine Antwort.'; return render(); }
+      if(s === 'buysFood' && D.buysFood === null){ V.err = 'Bitte tippe auf eine Antwort.'; return render(); }
+      if(s === 'food'){
+        if(!D.food){ V.err = 'Bitte gib einen Betrag ein. Das ist wichtig für die App.'; return render(); }
+        if(D.food < 500){
+          const next = () => { V.oStep++; V.err = ''; setTimeout(() => window.scrollTo(0, 0)); };
+          return dialog(`Du hast ${money(D.food)} am Tag eingegeben. Das ist sehr wenig für einen ganzen Tag. Unser Vorschlag: 5\u00a0€ am Tag.`, [
+            { label: `5\u00a0€ nehmen`, cls: 'primary', fn: () => { D.food = 500; next(); } },
+            { label: `Bei ${money(D.food)} bleiben`, fn: next },
+            { label: 'Neuen Betrag eingeben', fn: () => { V.num = ''; } }
+          ]);
+        }
+      }
+      return enterStep(V.oStep + 1);
+    }
+    case 'oback': leaveStep(); return enterStep(V.oStep - 1);
+    case 'setNeg': D.neg = v === 'yes'; if(!D.neg) D.start = Math.abs(D.start); V.err = ''; return render();
+    case 'setHorizon': D.horizon = v; V.err = ''; return render();
+    case 'setFood': D.buysFood = v === 'yes'; V.err = ''; return render();
+    case 'key':
+      if(v === 'del') V.num = V.num.slice(0, -1);
+      else if(v === ','){ if(!V.num.includes(',')) V.num = (V.num || '0') + ','; }
+      else {
+        const parts = V.num.split(',');
+        if(parts.length === 2){ if(parts[1].length < 2) V.num += v; }
+        else if(parts[0].length < 6) V.num = (V.num === '0' ? '' : V.num) + v;
+      }
+      V.err = ''; return render();
+    case 'finish': return finishSetup();
+    case 'newRec': V.ed = { kind: v, sub: 0, data: { type: v, name: '', amount: 0, rhythm: 'month', day: null, weekday: null, month: null } }; V.err = ''; render(); return window.scrollTo(0, 0);
+    case 'newPot': V.ed = { kind: 'pot', sub: 0, data: { name: '', emoji: '👕', photo: null, amount: 0 } }; V.err = ''; render(); return window.scrollTo(0, 0);
+    case 'delRec': { const r = D.rec.find(x => x.id === v); return ask(`Willst du „${r.name}“ wirklich löschen?`, 'Ja, löschen', () => { D.rec = D.rec.filter(x => x.id !== v); }, true); }
+    case 'delPot': { const p = D.pots.find(x => x.id === v); return ask(`Willst du den Geld-Topf „${p.name}“ wirklich löschen?`, 'Ja, löschen', () => { D.pots = D.pots.filter(x => x.id !== v); }, true); }
+
+    // Assistent
+    case 'edNext': return edNext();
+    case 'edBack':
+      V.err = '';
+      if(V.ed.sub === 0){ V.ed = null; return render(); }
+      if(V.ed.sub === 2 && V.ed.kind !== 'pot') V.ed.data.amount = numToCents(V.num);
+      V.ed.sub--;
+      if(V.ed.sub === 1) V.num = centsToNum(V.ed.data.amount);
+      return render();
+    case 'edRestart': V.ed.sub = 0; V.err = ''; return render();
+    case 'edChip': V.ed.data.name = v; V.err = ''; return render();
+    case 'edEmoji': V.ed.data.emoji = v; V.ed.data.photo = null; return render();
+    case 'edRhythm': V.ed.data.rhythm = v; V.err = ''; return render();
+    case 'edWeekday': V.ed.data.weekday = +v; V.err = ''; return render();
+    case 'edDay': V.ed.data.day = +v; V.err = ''; return render();
+    case 'edMonth': V.ed.data.month = +v; V.err = ''; return render();
+    case 'edSave': {
+      if(V.ed.target === 'store'){ storeSaveEditor(); V.ed = null; toast('Gespeichert ✓'); render(); return window.scrollTo(0, 0); }
+      const x = V.ed.data;
+      if(V.ed.kind === 'pot') D.pots.push({ id: uid(), name: x.name, emoji: x.emoji, photo: x.photo, amount: x.amount });
+      else {
+        const r = { id: uid(), type: x.type, name: x.name, amount: x.amount, rhythm: x.rhythm };
+        if(x.rhythm === 'week') r.weekday = x.weekday; else r.day = x.day;
+        if(x.rhythm === 'year') r.month = x.month;
+        D.rec.push(r);
+      }
+      V.ed = null; toast('Gespeichert ✓'); render(); return window.scrollTo(0, 0);
+    }
+
+    // Dialog
+    case 'dlg': { const b = dialogBtns[+v]; V.modal = null; dialogBtns = []; if(b && b.fn) b.fn(); return render(); }
+
+    // Einstellungen / Test
+    case 'toggle': S.settings[v] = !S.settings[v]; save(); return render();
+    case 'toggleHorizon': S.settings.horizon = S.settings.horizon === 'payday' ? 'month' : 'payday'; save(); return render();
+    case 'shiftDay': S.settings.testDate = addDays(today(), +v); save(); return render();
+    case 'shiftMonth': {
+      const [y, m, d] = pd(today()); let nm = m + (+v), ny = y;
+      if(nm < 1){ nm = 12; ny--; } if(nm > 12){ nm = 1; ny++; }
+      S.settings.testDate = ds(ny, nm, Math.min(d, dim(ny, nm))); save(); return render();
+    }
+    case 'realToday': S.settings.testDate = null; save(); return render();
+    case 'example': return ask('Beispiel-Daten laden? Deine jetzigen Daten werden dabei überschrieben.', 'Ja, laden', () => { loadExample(v); V.view = 'B'; toast('Beispiel geladen ✓'); }, true);
+    case 'reset': return ask('Willst du wirklich ALLES löschen und neu anfangen? Das kann man nicht rückgängig machen.', 'Ja, alles löschen', () => {
+      requirePin('Zur Sicherheit: Gib deine PIN ein, um alles zu löschen.', doReset);
+    }, true);
+  }
+}
+
+/* ---------- Ereignisse ---------- */
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if(!el || el.tagName === 'LABEL') return;
+  if(el.dataset.a === 'startTap' && e.target.closest('button') && e.target.closest('button') !== el) return;
+  act(el.dataset.a, el.dataset.v);
+});
+app.addEventListener('input', e => {
+  const k = e.target.dataset.in;
+  if(k === 'name'){ D.name = e.target.value; }
+  if(k === 'txText'){ V.tx.text = e.target.value; }
+  if(k === 'newName'){ V.newName = e.target.value; }
+  if(k === 'edName'){ V.ed.data.name = e.target.value; const b = app.querySelector('.tile b'); if(b) b.textContent = 'Geld für ' + (e.target.value || '…'); }
+});
+app.addEventListener('change', e => {
+  const k = e.target.dataset.in;
+  if(k === 'testDate' && e.target.value){ S.settings.testDate = e.target.value; save(); render(); }
+  if(k === 'photo' && e.target.files && e.target.files[0]) shrinkPhoto(e.target.files[0]);
+  if(k === 'importFile' && e.target.files && e.target.files[0]){ const rd = new FileReader(); rd.onload = () => importData(rd.result); rd.readAsText(e.target.files[0]); }
+});
+app.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text'){
+    e.preventDefault();
+    if(V.ed) return act('edNext');
+    if(V.view === 'D' || V.view === 'E') return act('txNext');
+    if(V.view === 'G'){ if(V.gsub === 'name') act('saveName'); if(V.gsub === 'forgot') act('checkCode'); return; }
+    act('onext');
+  }
+});
+function shrinkPhoto(file){
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 300, sc = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      V.ed.data.photo = cv.toDataURL('image/jpeg', 0.8); render();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
+
+render();
+
+/* Offline-Modus: nur auf der eigenen Website (z. B. GitHub Pages), nicht in der Vorschau */
+try {
+  const framed = window.self !== window.top;
+  if(!framed && 'serviceWorker' in navigator && location.protocol === 'https:')
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+} catch(e){}
+</script>
+</body>
+</html>
+
+{
+  "name": "Mein Geld",
+  "short_name": "Mein Geld",
+  "description": "Den Überblick über dein Geld behalten.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121417",
+  "theme_color": "#121417",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+
+/* Mein Geld – Service Worker: macht die App offline nutzbar.
+   Bei jeder neuen Version die Nummer in CACHE erhöhen. */
+const CACHE = 'mein-geld-v1';
+const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys()
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if(req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // Die App selbst: erst Netz (damit Updates ankommen), sonst aus dem Speicher
+  if(url.origin === location.origin){
+    e.respondWith(
+      fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res; })
+        .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+    );
+    return;
+  }
+  // Schrift von Google: aus dem Speicher, sonst Netz
+  if(url.hostname.endsWith('googleapis.com') || url.hostname.endsWith('gstatic.com')){
+    e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => {
+      const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
+    })));
+  }
+});
